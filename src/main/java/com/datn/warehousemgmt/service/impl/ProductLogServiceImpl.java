@@ -37,8 +37,10 @@ public class ProductLogServiceImpl implements ProductLogService {
     public ProductsLog updateLog(ProductLogDTO request) {
         ProductsLog productsLog = productLogRepository.findById(request.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.IMPORT_TICKET_NOT_FOUND));
-        productsLog.setQuantity(productsLog.getQuantity() + 1);
+        productsLog.setQuantity(request.getQuantity());
         productsLog.setStatus(request.getStatus());
+        productsLog.getPackets().clear();
+        productsLog.getPackets().addAll(request.getPackets());
         return productLogRepository.save(productsLog);
     }
 }

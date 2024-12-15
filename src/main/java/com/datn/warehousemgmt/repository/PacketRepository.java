@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PacketRepository extends JpaRepository<Packet, Long> {
 
-    @Query(value = "SELECT CASE WHEN COUNT(*) > 1 THEN true ELSE false END " +
+    @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END " +
             "FROM Packet WHERE rfidTag = ?1")
     Boolean checkIfAlreadyImport(String rfidTag);
 }

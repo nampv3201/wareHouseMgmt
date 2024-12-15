@@ -1,8 +1,10 @@
 package com.datn.warehousemgmt.mapper;
 
 import com.datn.warehousemgmt.dto.ProductDTO;
+import com.datn.warehousemgmt.dto.ProductLogDTO;
 import com.datn.warehousemgmt.entities.Category;
 import com.datn.warehousemgmt.entities.Product;
+import com.datn.warehousemgmt.entities.ProductsLog;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -29,4 +31,15 @@ public interface ProductMapper {
                 .map(Category::getName)
                 .toList();
     }
+
+    default ProductLogDTO fromEntityToLogDTO(ProductsLog productsLog){
+        ProductLogDTO productLogDTO = new ProductLogDTO();
+        productLogDTO.setId(productsLog.getId());
+        productLogDTO.setBatchProduct(productsLog.getBatchProduct());
+        productLogDTO.setQuantity(productsLog.getQuantity());
+        productLogDTO.setAction(productsLog.getAction());
+        productLogDTO.setStatus(productsLog.getStatus());
+        productLogDTO.setPackets(new ArrayList<>(productsLog.getPackets()));
+        return productLogDTO;
+    };
 }

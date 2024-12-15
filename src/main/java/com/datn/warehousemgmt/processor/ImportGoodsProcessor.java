@@ -8,6 +8,7 @@ import com.datn.warehousemgmt.dto.response.ImportProcessResponse;
 import com.datn.warehousemgmt.entities.*;
 import com.datn.warehousemgmt.exception.AppException;
 import com.datn.warehousemgmt.exception.ErrorCode;
+import com.datn.warehousemgmt.mapper.ProductMapper;
 import com.datn.warehousemgmt.service.*;
 import com.datn.warehousemgmt.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +26,9 @@ public class ImportGoodsProcessor {
     private final PacketService packetService;
     private final ProductService productService;
     private final ProductLogService productLogService;
-    private final LogDetailService logDetailService;
     private final WareHouseService wareHouseService;
     private final UserUtils utils;
+    private final ProductMapper productMapper;
 
     @Transactional
     public ServiceResponse importGoods(RfidDTO request){
@@ -40,7 +41,6 @@ public class ImportGoodsProcessor {
         // Create or Import Batch
         BatchProduct batchProduct;
         ProductsLog productsLog = new ProductsLog();
-        LogDetail logDetail = new LogDetail();
         ProductLogDTO productLogDTO = new ProductLogDTO();
         if(!oBatch.isPresent()){
             batchProduct = new BatchProduct();
@@ -69,8 +69,7 @@ public class ImportGoodsProcessor {
         }else{
             productsLog = oProductsLog.get();
         }
-        productLogDTO.setId(productsLog.getId());
-
+        productLogDTO = productMapper.fromEntityToLogDTO(productsLog);
         // Import Packet
         PacketDTO packetDTO = new PacketDTO();
         packetDTO.setRfidTag(request.getRfidCode());
@@ -80,20 +79,9 @@ public class ImportGoodsProcessor {
         Packet packet = (Packet) packetService.importPacket(packetDTO).getData();
 
         // Write Log
-        logDetail.setPacket(packet);
-        logDetail.setQuantity(request.getQuantity());
-        logDetail.setProductsLog(productsLog);
+        productLogDTO.getPackets().add(packet);
+        productLogDTO.setQuantity(productLogDTO.getQuantity() + 1);
         productsLog = productLogService.updateLog(productLogDTO);
-
-//        Stock stock = stockService.findBySkuCodeAndWareHouse(request.getSkuCode(), utils.getMyUser().getWarehouseId());
-//        if(stock == null){
-//            stock = new Stock();
-//            stock.setQuantity(0);
-//            stock.setSkuCode(request.getSkuCode());
-//            stock.setWarehouseId(utils.getMyUser().getWarehouseId());
-//        }
-//        stock.setQuantity(stock.getQuantity() + request.getQuantity());
-//        stock = stockService.save(stock);
 
         response.setBatchId(batchProduct.getId());
         response.setImportDate(LocalDate.from(productsLog.getCreatedDate()));

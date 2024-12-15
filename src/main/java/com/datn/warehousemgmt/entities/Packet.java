@@ -26,9 +26,6 @@ public class Packet {
     @Column(name = "batch_id")
     Long batchId;
 
-    @Column(name = "status")
+    @Column(name = "status", columnDefinition = "nvarchar(50)")
     String status;
-
-    @OneToMany(mappedBy = "packet", cascade = CascadeType.ALL)
-    private List<LogDetail> logDetails;
 }

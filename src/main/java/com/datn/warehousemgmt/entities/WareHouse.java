@@ -28,10 +28,6 @@ public class WareHouse {
     @JoinColumn(name = "ware_house_id")
     private List<BatchProduct> batchProducts = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "ware_house_id")
-    private List<Stock> stocks = new ArrayList<>();
-
     @OneToMany
     @JoinColumn(name = "ware_house_id")
     private List<Users> users = new ArrayList<>();

@@ -48,8 +48,4 @@ public class Product {
     @JoinColumn(name = "product_sku_code", referencedColumnName = "sku_code")
     private List<BatchProduct> batchProducts = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "product_sku_code", referencedColumnName = "sku_code")
-    private List<Stock> stock = new ArrayList<>();
-
 }
