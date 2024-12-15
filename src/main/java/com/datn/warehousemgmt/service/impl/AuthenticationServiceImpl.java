@@ -18,6 +18,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -49,11 +53,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             if(!user.isPresent()){
                 throw new AppException(ErrorCode.INVALID_ACCOUNT);
             }
-
             if(!passwordEncoder.matches(dto.getPassword(), user.get().getPassword())){
                 throw new AppException(ErrorCode.UNAUTHENTICATED);
             }
-
             var token = generateToken(user.get());
 
             return new ServiceResponse(token, "Đăng nhập thành công", 200);
@@ -86,6 +88,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         Instant.now().plus(24, ChronoUnit.HOURS).toEpochMilli()
                 ))
                 .jwtID(UUID.randomUUID().toString())
+                .claim("id", users.getId())
                 .claim("username", users.getUsername())
                 .build();
 

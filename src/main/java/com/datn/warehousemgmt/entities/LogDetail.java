@@ -10,8 +10,8 @@ import java.math.BigInteger;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "log_batch")
-public class Log {
+@Table(name = "log_detail")
+public class LogDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,12 +22,6 @@ public class Log {
     private ProductsLog productsLog;
 
     @ManyToOne
-    @JoinColumn(name = "batch_id")
-    private BatchProduct batchProduct;
-
-    @Column(name = "quantity")
-    Integer quantity;
-
-    @Column(name = "totalCost")
-    BigInteger totalCost;
+    @JoinColumn(name = "packet_id")
+    private Packet packet;
 }

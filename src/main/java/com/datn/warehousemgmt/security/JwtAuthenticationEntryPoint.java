@@ -1,4 +1,4 @@
-package com.datn.warehousemgmt.config;
+package com.datn.warehousemgmt.security;
 
 import com.datn.warehousemgmt.dto.ServiceResponse;
 import com.datn.warehousemgmt.exception.ErrorCode;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-@Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(

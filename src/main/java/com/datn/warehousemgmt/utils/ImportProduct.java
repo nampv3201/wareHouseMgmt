@@ -9,24 +9,27 @@ import com.datn.warehousemgmt.exception.ErrorCode;
 import com.datn.warehousemgmt.mapper.ProductMapper;
 import com.datn.warehousemgmt.repository.CategoryRepository;
 import com.datn.warehousemgmt.repository.ProductRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.csv.QuoteMode;
+import org.apache.commons.io.input.BOMInputStream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.print.DocFlavor;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ImportProduct {
 
     @Value("${upload.folder}")
@@ -38,37 +41,44 @@ public class ImportProduct {
     private final ProductRepository productRepository;
 
     private final CategoryRepository categoryRepository;
-    String[] HEADERS = {"SKU_Code", "Name", "Description", "Category"};
+    final String[] HEADERS = {"SKUCode", "Name", "Description", "Category"};
+    final String[] ERROR_HEADERS = {"SKUCode", "Name", "Error"};
     public ImportDetail readFileImportUserToCourse(String fileName){
         String path = uploadFolder + fileName;
         ImportDetail importDetail = new ImportDetail();
         List<ProductRequest> validProducts = new ArrayList<>();
         List<List<String>> errors = new ArrayList<>();
+        Integer counter = 0;
 
-        try (Reader in = new FileReader(path)) {
-            Iterable<CSVRecord> records = CSVFormat.DEFAULT
+        try (InputStream inputStream = new FileInputStream(path);
+             BOMInputStream bomInputStream = new BOMInputStream(inputStream);
+             Reader in = new InputStreamReader(bomInputStream, StandardCharsets.UTF_8)) {
+             Iterable<CSVRecord> records = CSVFormat.DEFAULT
                     .builder()
+                    .setHeader(HEADERS)
                     .setSkipHeaderRecord(false)
                     .build()
                     .parse(in);
 
             CSVRecord headerRecord = records.iterator().next();
-            List<String> actualHeaders = new ArrayList<>();
-            headerRecord.iterator().forEachRemaining(actualHeaders::add);
-
-            if (!actualHeaders.equals(List.of(HEADERS))) {
+            List<String> actualHeaders = new ArrayList<>(List.of(headerRecord.values()));
+            List<String> headers = new ArrayList<>();
+            Collections.addAll(headers, HEADERS);
+            if (!headers.equals(actualHeaders)){
                 throw new AppException(ErrorCode.FILE_FALSE_FORMAT);
             }
 
             for (CSVRecord record : records) {
-                String skuCode = record.get("SKU_Code");
+                counter++;
+                String skuCode = record.get("SKUCode");
                 String name = record.get("Name");
                 String description = record.get("Description");
                 List<Long> categories;
 
-                // Parse categories safely
                 try {
-                    categories = Arrays.stream(record.get("Categories").split(","))
+                    categories = Arrays.stream(record.get("Category").split(","))
+                            .map(String::trim)
+                            .filter(s -> s.matches("\\d+"))
                             .map(Long::parseLong)
                             .collect(Collectors.toList());
                 } catch (NumberFormatException e) {
@@ -96,15 +106,18 @@ public class ImportProduct {
                 }
 
                 if (isValid) {
-                    validProducts.add(new ProductRequest(skuCode, name, description, categories, null, null));
-                } else {
-                    errorRecord.add(errorMessages.toString());
-                    errors.add(errorRecord);
+                    validProducts.add(new ProductRequest(skuCode, name, description, null, categories, null, null));
+                    errorMessages.append("Success");
                 }
+
+                errorRecord.add(errorMessages.toString());
+                errors.add(errorRecord);
+
             }
 
             importDetail.setProducts(validProducts);
             importDetail.setError(errors);
+            importDetail.setTotalRow(counter);
 
         } catch (FileNotFoundException e) {
             throw new AppException(ErrorCode.FILE_NOT_FOUND);
@@ -115,6 +128,7 @@ public class ImportProduct {
         return importDetail;
     }
 
+    @Transactional
     public void importProduct(ImportDetail importDetail){
         List<Product> productList = new ArrayList<>();
         try {
@@ -134,17 +148,31 @@ public class ImportProduct {
 
     public String fileErrorName(ImportDetail importDetail, String fileName){
         List<String> fileSplit = List.of(fileName.split("\\."));
-        String outputPath = uploadResultFolder + fileSplit.get(0) + UUID.randomUUID() + "." + fileSplit.get(1);
-        try (Writer writer = new FileWriter(outputPath);
-            CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(HEADERS))) {
-            for(int i = 0; i< importDetail.getError().size(); i++) {
-                csvPrinter.printRecord(importDetail.getError().get(i));
+        String originalName = fileName.split("-")[0];
+        String outputPath = uploadResultFolder + originalName + "-" + UUID.randomUUID() + "." + fileSplit.get(1);
+
+        try (FileOutputStream fileOutputStream = new FileOutputStream(outputPath)){
+            fileOutputStream.write(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF});
+            try(
+                    OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream, StandardCharsets.UTF_8);
+                    BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
+                    CSVPrinter csvPrinter = new CSVPrinter(bufferedWriter,
+                            CSVFormat.DEFAULT.builder()
+                                    .setHeader(ERROR_HEADERS)
+                                    .setQuoteMode(QuoteMode.ALL)
+                                    .build())) {
+                for (List<String> error : importDetail.getError()) {
+                    csvPrinter.printRecord(error);
+                }
+                csvPrinter.flush();
             }
         }catch (FileNotFoundException e) {
             throw new AppException(ErrorCode.FILE_NOT_FOUND);
-        }catch (IOException e) {
+        } catch (IOException e) {
             throw new AppException(ErrorCode.IO_EXCEPTION);
         }
+
         return outputPath;
+
     }
 }

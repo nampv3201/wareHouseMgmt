@@ -14,4 +14,5 @@ import java.util.List;
 public class ImportDetail {
     private List<ProductRequest> products = new ArrayList<>();
     private List<List<String>> error = new ArrayList<>();
+    private Integer totalRow;
 }

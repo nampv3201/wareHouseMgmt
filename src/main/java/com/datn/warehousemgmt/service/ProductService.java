@@ -15,4 +15,6 @@ public interface ProductService {
     ServiceResponse importProduct(String fileName);
 
     ServiceResponse getProduct(ProductRequest request);
+
+    Boolean existProductBySKUCode(String SKUCode);
 }

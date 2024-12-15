@@ -25,4 +25,5 @@ public class ServiceResponse {
         this.code = code;
         this.data = data;
     }
+
 }

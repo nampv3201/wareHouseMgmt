@@ -17,5 +17,6 @@ public class ProductDTO {
     String skuCode;
     String name;
     String description;
+    String imageLink;
     List<String> categoryList = new ArrayList<>();
 }

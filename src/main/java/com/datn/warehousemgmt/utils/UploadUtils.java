@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -30,11 +31,11 @@ public class UploadUtils {
         String name = StringUtils.substringBeforeLast(multipartFile.getOriginalFilename(), ".");
         String subFix = StringUtils.substringAfterLast(multipartFile.getOriginalFilename(), ".");
         StringBuilder originName =
-                new StringBuilder(uploadFolder + name + UUID.randomUUID() + "." + subFix);
+                new StringBuilder(uploadFolder + name + "-" + UUID.randomUUID() + "." + subFix);
         File file = new File(originName.toString());
         try {
             multipartFile.transferTo(file);
-            return new ServiceResponse("Upload thành công", 200);
+            return new ServiceResponse(file.getName(), 200);
         } catch (IOException e) {
             throw new AppException(ErrorCode.IO_EXCEPTION);
         } catch(Exception e) {
@@ -44,7 +45,7 @@ public class UploadUtils {
 
     public void validateUpload(MultipartFile multipartFile){
         String subFix = StringUtils.substringAfterLast(multipartFile.getOriginalFilename(), ".");
-        if(allowPrefixes.contains(subFix)){
+        if(!allowPrefixes.contains(subFix)){
             throw new AppException(ErrorCode.FILE_NOT_ALLOWED);
         }
     }

@@ -21,6 +21,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,6 +34,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
+    @Value("${product.img.default}")
+    private String defaultImage;
     public static final String PREFIX = "NTPL-";
     public static final String alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -44,6 +48,7 @@ public class ProductServiceImpl implements ProductService {
     private final ImportProduct importProduct;
     @Override
     public String generateSKUCode(){
+        SecurityContextHolder.getContext().getAuthentication();
         StringBuilder code = new StringBuilder();
         Random r = new Random();
         for (int i = 0; i < 12; i++) {
@@ -72,6 +77,9 @@ public class ProductServiceImpl implements ProductService {
     public ServiceResponse createProduct(ProductRequest request) {
         Product p = new Product();
         BeanUtils.copyProperties(request, p);
+        if(p.getImageLink().isEmpty()){
+            p.setImageLink(defaultImage);
+        }
         p.getCategories().addAll(categoryRepository.findAllByIdIn(request.getCategoryIds()));
         try{
             productRepository.save(p);
@@ -90,6 +98,7 @@ public class ProductServiceImpl implements ProductService {
         Product p = optionalProduct.get();
         p.setName(request.getName());
         p.setDescription(request.getDescription());
+        p.setImageLink(request.getImageLink());
         p.getCategories().addAll(categoryRepository.findAllByIdIn(request.getCategoryIds()));
         try{
             productRepository.save(p);
@@ -114,16 +123,23 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Boolean existProductBySKUCode(String SKUCode) {
+        return productRepository.existsBySkuCode(SKUCode);
+    }
+
+    @Override
     @Transactional
     public ServiceResponse importProduct(String fileName) {
+        String errorPath = null;
         try {
             ImportDetail importDetail = importProduct.readFileImportUserToCourse(fileName);
-            importProduct.importProduct(importDetail);
-            String errorPath = importProduct.fileErrorName(importDetail, fileName);
-
             ResponseImportModel responseImportModel = new ResponseImportModel();
             responseImportModel.setTotalSuccess(importDetail.getProducts().size());
-            responseImportModel.setTotalFail(importDetail.getError().size());
+            responseImportModel.setTotalFail(importDetail.getTotalRow() - importDetail.getProducts().size());
+            importProduct.importProduct(importDetail);
+            if(importDetail.getError() != null || !importDetail.getError().isEmpty()) {
+                errorPath = importProduct.fileErrorName(importDetail, fileName);
+            }
             responseImportModel.setPathExcel(errorPath);
             return new ServiceResponse(responseImportModel, "Import thành công", 200);
         }catch (AppException e){

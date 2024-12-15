@@ -29,6 +29,9 @@ public class Product {
     @Column(name = "description", columnDefinition = "nvarchar(max)")
     String description;
 
+    @Column(name = "image_link", columnDefinition = "nvarchar(max)")
+    String imageLink;
+
     @CreatedDate
     LocalDateTime createdDate;
 

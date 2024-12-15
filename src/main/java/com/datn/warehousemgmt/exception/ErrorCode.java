@@ -24,6 +24,7 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND(0, "Không tìm thấy sản phẩm", HttpStatus.NOT_FOUND),
     CATEGORY_NOT_FOUND(0, "Không tìm thấy danh mục", HttpStatus.NOT_FOUND),
     BATCH_NOT_FOUND(0, "Không tìm thấy thông tin lô", HttpStatus.NOT_FOUND),
+    BATCH_INFORMATION_NOT_MATCH(0, "Thông tin lô không khớp trong cơ sở dữ liệu", HttpStatus.NOT_FOUND),
 
     FILE_NOT_FOUND(0, "Không tìm thấy file", HttpStatus.NOT_FOUND),
     IO_EXCEPTION(0, "Xảy ra lỗi trong quá trình đọc file", HttpStatus.NOT_FOUND),
@@ -37,6 +38,14 @@ public enum ErrorCode {
     FILE_FALSE_FORMAT(0, "Định dạng file không đúng theo template", HttpStatus.BAD_REQUEST),
     WRONG_INPUT1(0, "Vui lòng nhập đủ các trưng thông tin", HttpStatus.BAD_REQUEST),
     WRONG_INPUT2(0, "Vui lòng nhập đủ các trưng thông tin", HttpStatus.BAD_REQUEST),
+
+    IMPORT_GOODS_LIST_EMPTY(0, "Không có nhận diện được hàng hóa nhập", HttpStatus.BAD_REQUEST),
+    INVALID_RFID_TAG(0, "Thẻ không hợp lệ", HttpStatus.BAD_REQUEST),
+    PACKET_ALREADY_IMPORTED(0, "Packet đã tồn tại trong kho", HttpStatus.BAD_REQUEST),
+
+    IMPORT_TICKET_NOT_FOUND(0, "Không tìm thấy phiếu nhập", HttpStatus.BAD_REQUEST),
+
+    WARE_HOUSE_NOT_EXIST(0, "Không tìm thấy thông tin kho hàng", HttpStatus.BAD_REQUEST),
 
     ;
 

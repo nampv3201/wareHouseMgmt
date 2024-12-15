@@ -17,11 +17,7 @@ import java.util.List;
 public class BatchProduct {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-
-    @Column(name = "rfid_tag")
-    String rfidTag;
 
     @Column(name = "product_sku_code")
     String productSkuCode;
@@ -38,8 +34,8 @@ public class BatchProduct {
     @Column(name = "manufacture_date")
     LocalDate manufacturerDate;
 
-    @Column(name = "expiry_date")
-    LocalDate expiryDate;
+    @Column(name = "expiration_date")
+    LocalDate expirationDate;
 
     @Column(name = "in_price")
     BigInteger inPrice;
@@ -47,6 +43,7 @@ public class BatchProduct {
     @Column(name = "out_price")
     BigInteger outPrice;
 
-    @OneToMany(mappedBy = "batchProduct", cascade = CascadeType.ALL)
-    private List<Log> logs;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "batch_id", referencedColumnName = "id")
+    private List<Packet> packets = new ArrayList<>();
 }

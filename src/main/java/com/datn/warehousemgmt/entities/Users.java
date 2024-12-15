@@ -22,7 +22,7 @@ public class Users {
     @Column(name = "email", columnDefinition = "nvarchar(255)", unique = true)
     String email;
 
-    @Column(name = "name")
+    @Column(name = "name", columnDefinition = "nvarchar(255)")
     String name;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
@@ -42,6 +42,9 @@ public class Users {
 
     @Column(name = "sex")
     Integer gender;
+
+    @Column(name = "ware_house_id")
+    Long warehouseId;
 
     @ManyToMany
     @JoinTable(name = "user_permission",

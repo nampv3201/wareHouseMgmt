@@ -1,10 +1,11 @@
-package com.datn.warehousemgmt.config;
+package com.datn.warehousemgmt.security;
 
 import com.datn.warehousemgmt.dto.IntrospectDTO;
 import com.datn.warehousemgmt.service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -19,13 +20,13 @@ import java.text.ParseException;
 import java.util.Objects;
 
 @Component
-@RequiredArgsConstructor
 public class CustomJwtDecoder implements JwtDecoder {
     @Value("${jwt.signerKey}")
     private String signerKey;
 
     @Lazy
-    private final AuthenticationService authenticationService;
+    @Autowired
+    private AuthenticationService authenticationService;
 
     private NimbusJwtDecoder nimbusJwtDecoder = null;
 

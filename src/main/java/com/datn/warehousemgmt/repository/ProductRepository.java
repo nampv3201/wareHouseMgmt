@@ -11,15 +11,17 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @Query(value = "Select p from Product p " +
-            "where (:search IS NULL " +
+    @Query(value = "SELECT p FROM Product p " +
+            "WHERE (:search IS NULL " +
             "OR :search = '' " +
             "OR LOWER(p.name) LIKE concat('%', coalesce(:search, ''), '%') " +
             "OR LOWER(p.skuCode) LIKE concat('%', coalesce(:search, ''), '%'))")
     Page<Product> getProduct(@Param("search") String search, Pageable pageable);
 
-    @Query(value = "Select p from Product p where p.skuCode =  ?1")
+    @Query(value = "SELECT p FROM Product p WHERE p.skuCode =  ?1")
     Optional<Product> findProductBySkuCode(String skuCode);
 
+    @Query(value = "SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END " +
+            "FROM Product p WHERE p.skuCode = ?1")
     Boolean existsBySkuCode(String skuCode);
 }
