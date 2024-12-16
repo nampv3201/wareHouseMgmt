@@ -10,6 +10,7 @@ import com.datn.warehousemgmt.exception.AppException;
 import com.datn.warehousemgmt.exception.ErrorCode;
 import com.datn.warehousemgmt.mapper.ProductMapper;
 import com.datn.warehousemgmt.service.*;
+import com.datn.warehousemgmt.utils.Constant;
 import com.datn.warehousemgmt.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,7 +37,10 @@ public class ImportGoodsProcessor {
         ImportProcessResponse response = new ImportProcessResponse();
         verifyImportGoodRequest(request);
         Optional<BatchProduct> oBatch = batchService.getBatchById(request.getBatchId());
-        Optional<ProductsLog> oProductsLog = productLogService.findByStatusAndBatchId("PENDING", request.getBatchId());
+        Optional<ProductsLog> oProductsLog = productLogService.findByStatusAndBatchId(
+                Constant.ProductLogStatus.PENDING.name(),
+                request.getBatchId()
+        );
 
         // Create or Import Batch
         BatchProduct batchProduct;
@@ -63,8 +67,8 @@ public class ImportGoodsProcessor {
 
         if(!oProductsLog.isPresent()){
             productLogDTO.setBatchProduct(batchProduct);
-            productLogDTO.setAction("IMPORT");
-            productLogDTO.setStatus("PENDING");
+            productLogDTO.setAction(Constant.ProductLogAction.IMPORT.name());
+            productLogDTO.setStatus(Constant.ProductLogStatus.PENDING.name());
             productsLog = productLogService.createLog(productLogDTO);
         }else{
             productsLog = oProductsLog.get();
@@ -75,7 +79,7 @@ public class ImportGoodsProcessor {
         packetDTO.setRfidTag(request.getRfidCode());
         packetDTO.setBatchId(batchProduct.getId());
         packetDTO.setQuantity(request.getQuantity());
-        packetDTO.setStatus("Đã nhập kho");
+        packetDTO.setStatus(Constant.PacketStatus.IN_STOCK.getStatus());
         Packet packet = (Packet) packetService.importPacket(packetDTO).getData();
 
         // Write Log

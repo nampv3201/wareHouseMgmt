@@ -1,22 +1,33 @@
 package com.datn.warehousemgmt.service.impl;
 
 import com.datn.warehousemgmt.dto.ProductLogDTO;
+import com.datn.warehousemgmt.dto.ServiceResponse;
+import com.datn.warehousemgmt.dto.request.ProductLogSearchRequest;
+import com.datn.warehousemgmt.entities.Permission;
 import com.datn.warehousemgmt.entities.ProductsLog;
+import com.datn.warehousemgmt.entities.Users;
 import com.datn.warehousemgmt.exception.AppException;
 import com.datn.warehousemgmt.exception.ErrorCode;
 import com.datn.warehousemgmt.repository.ProductLogRepository;
 import com.datn.warehousemgmt.service.ProductLogService;
+import com.datn.warehousemgmt.utils.Constant;
+import com.datn.warehousemgmt.utils.PageUtils;
+import com.datn.warehousemgmt.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProductLogServiceImpl implements ProductLogService {
 
     private final ProductLogRepository productLogRepository;
+    private final UserUtils utils;
     @Override
     public Optional<ProductsLog> findByStatusAndBatchId(String status, Long batchId) {
         return productLogRepository.findByStatusAndBatchProductId(status, batchId);
@@ -42,5 +53,23 @@ public class ProductLogServiceImpl implements ProductLogService {
         productsLog.getPackets().clear();
         productsLog.getPackets().addAll(request.getPackets());
         return productLogRepository.save(productsLog);
+    }
+
+    @Override
+    public ServiceResponse findLog(ProductLogSearchRequest request) {
+        try {
+            Users u = utils.getMyUser();
+            Pageable pageable = PageUtils.customPage(request.getPageDTO());
+            if(u.getPermissions().stream().map(Permission::getName)
+                    .toList().contains(Constant.ADMIN_ROLE)){
+                u.setWarehouseId(null);
+            }
+            Page<ProductsLog> page = productLogRepository.findLog(request.getSearch(), request.getStartDateTime(), request.getEndDateTime(),
+                    request.getAction(), request.getStatus(), u.getWarehouseId(), pageable);
+            return new ServiceResponse(page.getContent(), "Lấy danh sách thành công", 200,
+                    page.getTotalPages(), page.getTotalElements(), page.getNumber() + 1);
+        }catch (RuntimeException e){
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

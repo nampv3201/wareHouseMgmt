@@ -24,7 +24,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> createProduct(@PathVariable("id") String skuCode){
+    public ResponseEntity<?> getProduct(@PathVariable("id") String skuCode){
         return new ResponseEntity<>(productService.getOne(skuCode), HttpStatus.OK);
     }
 
