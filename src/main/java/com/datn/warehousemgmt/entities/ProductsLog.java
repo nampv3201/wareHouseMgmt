@@ -42,7 +42,7 @@ public class ProductsLog {
     @Column(name = "status")
     String status;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "log_details",
             joinColumns = @JoinColumn(name = "product_log_id"),
             inverseJoinColumns = @JoinColumn(name = "packet_id"))

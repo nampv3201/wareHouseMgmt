@@ -10,12 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/product-log")
+@RequestMapping("/api/productLog")
 @RequiredArgsConstructor
 public class ProductLogController {
     private final ProductLogService productLogService;
 
-    @PutMapping("/change-log-status")
+    @PutMapping("/change-status")
     public ResponseEntity<?> changeLogStatus(@RequestBody ProductLogDTO dto){
         ServiceResponse result = new ServiceResponse(productLogService.updateLog(dto), "Đổi trạng thái thành công", 200);
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -23,7 +23,11 @@ public class ProductLogController {
 
     @PostMapping("/find-log")
     public ResponseEntity<?> findLog(@RequestBody ProductLogSearchRequest request){
-        ServiceResponse result = new ServiceResponse(productLogService.findLog(request), "Tìm kiếm thành công", 200);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(productLogService.findLog(request), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getLog(@PathVariable("id") Long id){
+        return new ResponseEntity<>(productLogService.getLog(id), HttpStatus.OK);
     }
 }

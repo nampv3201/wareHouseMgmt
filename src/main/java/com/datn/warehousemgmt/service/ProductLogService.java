@@ -15,4 +15,6 @@ public interface ProductLogService {
     Optional<ProductsLog> findByStatusAndBatchId(String status, Long batchId);
 
     ServiceResponse findLog(ProductLogSearchRequest request);
+
+    ServiceResponse getLog(Long id);
 }
