@@ -46,7 +46,7 @@ public class ImportGoodsProcessor {
         BatchProduct batchProduct;
         ProductsLog productsLog = new ProductsLog();
         ProductLogDTO productLogDTO = new ProductLogDTO();
-        if(!oBatch.isPresent()){
+        if(oBatch.isEmpty()){
             batchProduct = new BatchProduct();
             batchProduct.setId(request.getBatchId());
             batchProduct.setProductSkuCode(request.getSkuCode());

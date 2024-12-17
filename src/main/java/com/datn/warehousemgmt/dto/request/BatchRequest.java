@@ -1,5 +1,6 @@
 package com.datn.warehousemgmt.dto.request;
 
+import com.datn.warehousemgmt.utils.PageDTO;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -15,4 +16,5 @@ public class BatchRequest {
     LocalDate manufacturerDate;
     LocalDate expirationDate;
     Long warehouseId;
+    PageDTO pageDTO;
 }
