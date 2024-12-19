@@ -66,7 +66,7 @@ public class ImportGoodsProcessor {
         batchProduct = batchService.save(batchProduct);
 
         if(!oProductsLog.isPresent()){
-            productLogDTO.setBatchProduct(batchProduct);
+            productLogDTO.setBatchProductId(batchProduct.getId());
             productLogDTO.setAction(Constant.ProductLogAction.IMPORT.name());
             productLogDTO.setStatus(Constant.ProductLogStatus.PENDING.name());
             productsLog = productLogService.createLog(productLogDTO);

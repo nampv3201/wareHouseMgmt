@@ -43,7 +43,8 @@ public class BatchServiceImpl implements BatchService {
     public ServiceResponse getBatchBySku(BatchRequest request) {
         Pageable pageable = PageUtils.customPage(request.getPageDTO());
         try {
-            Page<BatchProduct> page = batchProductRepository.getAllBySkuCode(request.getProductSkuCode(), pageable);
+            Page<BatchProduct> page = batchProductRepository.getAllBySkuCode(request.getProductSkuCode(), request.getSupplierId(),
+                    request.getStatus(), pageable);
             return new ServiceResponse(page.getContent(), "Lấy thông tin lô thành công", 200,
                     page.getTotalPages(), page.getTotalElements(), page.getNumber() + 1);
         }catch(Exception e) {

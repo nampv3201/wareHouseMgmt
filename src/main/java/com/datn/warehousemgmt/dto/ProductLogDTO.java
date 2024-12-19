@@ -13,7 +13,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductLogDTO {
     Long id;
-    BatchProduct batchProduct;
+    Long batchProductId;
     Integer quantity;
     String action;
     String status;

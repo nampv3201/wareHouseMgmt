@@ -2,6 +2,7 @@ package com.datn.warehousemgmt.mapper;
 
 import com.datn.warehousemgmt.dto.ProductDTO;
 import com.datn.warehousemgmt.dto.ProductLogDTO;
+import com.datn.warehousemgmt.dto.response.ProductLogListResponse;
 import com.datn.warehousemgmt.entities.Category;
 import com.datn.warehousemgmt.entities.Product;
 import com.datn.warehousemgmt.entities.ProductsLog;
@@ -12,12 +13,13 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
-//    @Mapping(source = "categories", target = "categoryList",
-//            qualifiedByName = "mapCategoryNames")
+    @Mapping(source = "categories", target = "categoryList",
+            qualifiedByName = "mapCategoryNames")
     ProductDTO productToProductDTO(Product product);
 
     Product productDTOToProduct(ProductDTO productDTO);
@@ -35,11 +37,24 @@ public interface ProductMapper {
     default ProductLogDTO fromEntityToLogDTO(ProductsLog productsLog){
         ProductLogDTO productLogDTO = new ProductLogDTO();
         productLogDTO.setId(productsLog.getId());
-        productLogDTO.setBatchProduct(productsLog.getBatchProduct());
+        productLogDTO.setBatchProductId(productsLog.getBatchProduct().getId());
         productLogDTO.setQuantity(productsLog.getQuantity());
         productLogDTO.setAction(productsLog.getAction());
         productLogDTO.setStatus(productsLog.getStatus());
         productLogDTO.setPackets(new ArrayList<>(productsLog.getPackets()));
         return productLogDTO;
     };
+
+    default ProductLogListResponse toSearchLog(Map<String, Object> obj){
+        ProductLogListResponse response = new ProductLogListResponse();
+        response.setId((Long) obj.get("id"));
+        response.setSkuCode((String) obj.get("skuCode"));
+        response.setProductName((String) obj.get("name"));
+        response.setBatchProductId((Long) obj.get("batchId"));
+        response.setQuantity((Integer) obj.get("quantity"));
+        response.setAction((String) obj.get("action"));
+        response.setStatus((String) obj.get("status"));
+
+        return response;
+    }
 }

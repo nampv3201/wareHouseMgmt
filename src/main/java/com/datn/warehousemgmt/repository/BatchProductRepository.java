@@ -11,9 +11,10 @@ import java.util.List;
 public interface BatchProductRepository extends JpaRepository<BatchProduct, Long> {
 
     @Query("SELECT bp FROM BatchProduct bp " +
-            "WHERE (?1 Is null or ?1 = '' or bp.productSkuCode = ?1) " +
-            "and (?2 is null or ?2 = '' or bp.supplierId = ?2) " +
-            "and (?3 is null or ?3 = '')")
+            "WHERE (?1 IS NULL OR ?1 = '' OR bp.productSkuCode = ?1) " +
+            "AND (?2 IS NULL OR bp.supplierId = ?2) " +
+            "AND ((?3 LIKE 'expired' AND bp.expirationDate < CURRENT_TIMESTAMP) " +
+            "     OR (?3 IS NULL OR ?3 = '' OR bp.expirationDate >= CURRENT_TIMESTAMP))")
     Page<BatchProduct> getAllBySkuCode(String skuCode, Long supplierId,
                                        String status, Pageable pageable);
 }

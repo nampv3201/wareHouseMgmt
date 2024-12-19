@@ -17,4 +17,6 @@ public class BatchRequest {
     LocalDate expirationDate;
     Long warehouseId;
     PageDTO pageDTO;
+    Long supplierId;
+    String status;
 }
