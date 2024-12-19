@@ -14,6 +14,7 @@ import java.util.List;
 public class ProductLogDTO {
     Long id;
     Long batchProductId;
+    String supplierName;
     Integer quantity;
     String action;
     String status;

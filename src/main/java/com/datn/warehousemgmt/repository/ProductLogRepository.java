@@ -1,6 +1,6 @@
 package com.datn.warehousemgmt.repository;
 
-import com.datn.warehousemgmt.dto.response.ProductLogListResponse;
+import com.datn.warehousemgmt.entities.Packet;
 import com.datn.warehousemgmt.entities.ProductsLog;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,6 +24,8 @@ public interface ProductLogRepository extends JpaRepository<ProductsLog, Long> {
             "b.product_sku_code as skuCode, " +
             "p.name as name, " +
             "b.id as batchId, " +
+            "pl.created_by as worker, " +
+            "pl.created_date as createdDate, " +
             "pl.quantity as quantity, " +
             "pl.action as action, " +
             "pl.status as status " +

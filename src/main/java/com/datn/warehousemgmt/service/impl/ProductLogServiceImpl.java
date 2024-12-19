@@ -4,18 +4,15 @@ import com.datn.warehousemgmt.dto.ProductLogDTO;
 import com.datn.warehousemgmt.dto.ServiceResponse;
 import com.datn.warehousemgmt.dto.request.ProductLogSearchRequest;
 import com.datn.warehousemgmt.dto.response.ProductLogListResponse;
-import com.datn.warehousemgmt.entities.BatchProduct;
-import com.datn.warehousemgmt.entities.Permission;
-import com.datn.warehousemgmt.entities.ProductsLog;
-import com.datn.warehousemgmt.entities.Users;
+import com.datn.warehousemgmt.entities.*;
 import com.datn.warehousemgmt.exception.AppException;
 import com.datn.warehousemgmt.exception.ErrorCode;
 import com.datn.warehousemgmt.mapper.ProductMapper;
 import com.datn.warehousemgmt.repository.BatchProductRepository;
+import com.datn.warehousemgmt.repository.PacketRepository;
 import com.datn.warehousemgmt.repository.ProductLogRepository;
 import com.datn.warehousemgmt.service.ProductLogService;
 import com.datn.warehousemgmt.utils.Constant;
-import com.datn.warehousemgmt.utils.PageDTO;
 import com.datn.warehousemgmt.utils.PageUtils;
 import com.datn.warehousemgmt.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +21,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +33,7 @@ public class ProductLogServiceImpl implements ProductLogService {
 
     private final ProductLogRepository productLogRepository;
     private final BatchProductRepository batchProductRepository;
+    private final PacketRepository packetRepository;
 
     private final UserUtils utils;
     private final ProductMapper productMapper;
@@ -67,22 +68,44 @@ public class ProductLogServiceImpl implements ProductLogService {
     }
 
     @Override
+    public ServiceResponse changeStatus(ProductLogDTO request) {
+        try {
+            ProductsLog productsLog = productLogRepository.findById(request.getId())
+                    .orElseThrow(() -> new AppException(ErrorCode.IMPORT_TICKET_NOT_FOUND));
+            if (Objects.equals(productsLog.getStatus(), Constant.ProductLogStatus.PENDING.name())) {
+                productsLog.setStatus(Constant.ProductLogStatus.CLOSED.name());
+            } else {
+                productsLog.setStatus(Constant.ProductLogStatus.PENDING.name());
+            }
+            productsLog = productLogRepository.save(productsLog);
+            return new ServiceResponse("Cập nhật trạng thái thành công: " + productsLog.getStatus(), 200);
+        }catch (Exception e){
+            throw new AppException(ErrorCode.UPDATE_FAILED);
+        }
+    }
+
+    @Override
     public ServiceResponse findLog(ProductLogSearchRequest request) {
         try {
             Users u = utils.getMyUser();
-//            PageDTO pageDto = request.getPageDTO();
-//            if(pageDto == null){
-//                pageDto = new PageDTO();
-//                pageDto.setSortBy("pl.id");
-//            }
             Pageable pageable = PageUtils.customPage(request.getPageDTO());
             if(u.getPermissions().stream().map(Permission::getName)
                     .toList().contains(Constant.ADMIN_ROLE)){
                 u.setWarehouseId(null);
             }
-            Page<ProductLogListResponse > page = productLogRepository.findLog(request.getSearch(), request.getStartDateTime(), request.getEndDateTime(),
-                    request.getAction(), request.getStatus(), u.getWarehouseId(), pageable);
-            return new ServiceResponse(page.getContent(), "Lấy danh sách thành công", 200,
+            Page<Map<String, Object> > page = productLogRepository.findLog(request.getSearch(),
+                    request.getStartDateTime(),
+                    request.getEndDateTime(),
+                    request.getAction(),
+                    request.getStatus(),
+                    u.getWarehouseId(),
+                    pageable);
+            List<ProductLogListResponse> result = page.stream().map(res -> {
+                List<Packet> packets = packetRepository.getPacketList((Long) res.get("id"));
+                return productMapper.toSearchLog(res, packets);
+            }).collect(Collectors.toList());
+
+            return new ServiceResponse(result, "Lấy danh sách thành công", 200,
                     page.getTotalPages(), page.getTotalElements(), page.getNumber() + 1);
         }catch (RuntimeException e){
             throw new RuntimeException(e.getMessage());
@@ -90,7 +113,7 @@ public class ProductLogServiceImpl implements ProductLogService {
     }
 
     @Override
-    public ServiceResponse getLog(Long id){
+    public ServiceResponse getLogDetail(Long id){
         try{
             ProductsLog log = productLogRepository.findById(id)
                    .orElseThrow(() -> new AppException(ErrorCode.IMPORT_TICKET_NOT_FOUND));

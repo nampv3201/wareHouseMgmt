@@ -12,9 +12,11 @@ public interface ProductLogService {
 
     ProductsLog updateLog(ProductLogDTO request);
 
+    ServiceResponse changeStatus(ProductLogDTO request);
+
     Optional<ProductsLog> findByStatusAndBatchId(String status, Long batchId);
 
     ServiceResponse findLog(ProductLogSearchRequest request);
 
-    ServiceResponse getLog(Long id);
+    ServiceResponse getLogDetail(Long id);
 }

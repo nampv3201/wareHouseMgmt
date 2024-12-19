@@ -17,7 +17,7 @@ public class ProductLogController {
 
     @PutMapping("/change-status")
     public ResponseEntity<?> changeLogStatus(@RequestBody ProductLogDTO dto){
-        ServiceResponse result = new ServiceResponse(productLogService.updateLog(dto), "Đổi trạng thái thành công", 200);
+        ServiceResponse result = productLogService.changeStatus(dto);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
@@ -28,6 +28,6 @@ public class ProductLogController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getLog(@PathVariable("id") Long id){
-        return new ResponseEntity<>(productLogService.getLog(id), HttpStatus.OK);
+        return new ResponseEntity<>(productLogService.getLogDetail(id), HttpStatus.OK);
     }
 }
