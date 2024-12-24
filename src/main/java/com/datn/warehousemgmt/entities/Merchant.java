@@ -11,8 +11,8 @@ import java.util.List;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "supplier")
-public class Supplier {
+@Table(name = "merchant")
+public class Merchant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +26,9 @@ public class Supplier {
 
     @Column(name = "phone")
     String phone;
+
+    @Column(name = "type")
+    String type;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "supplier_id")

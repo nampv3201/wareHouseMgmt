@@ -36,17 +36,18 @@ public class ImportGoodsProcessor {
         Users myAccount = utils.getMyUser();
         ImportProcessResponse response = new ImportProcessResponse();
         verifyImportGoodRequest(request);
-        Optional<BatchProduct> oBatch = batchService.getBatchById(request.getBatchId());
-        Optional<ProductsLog> oProductsLog = productLogService.findByStatusAndBatchId(
+        BatchProduct batchProduct = batchService.getBatchById(request.getBatchId());
+        Optional<ProductsLog> oProductsLog = productLogService.findByStatusActionAndBatchId(
                 Constant.ProductLogStatus.PENDING.name(),
+                Constant.ProductLogAction.IMPORT.name(),
                 request.getBatchId()
         );
 
         // Create or Import Batch
-        BatchProduct batchProduct;
+//        BatchProduct batchProduct;
         ProductsLog productsLog = new ProductsLog();
         ProductLogDTO productLogDTO = new ProductLogDTO();
-        if(oBatch.isEmpty()){
+        if(batchProduct == null){
             batchProduct = new BatchProduct();
             batchProduct.setId(request.getBatchId());
             batchProduct.setProductSkuCode(request.getSkuCode());
@@ -55,7 +56,6 @@ public class ImportGoodsProcessor {
             batchProduct.setWarehouseId(utils.getMyUser().getWarehouseId());
             batchProduct.setQuantity(1);
         }else {
-            batchProduct = oBatch.get();
             if (!batchProduct.getManufacturerDate().equals(request.getManufacturerDate()) ||
                     !batchProduct.getExpirationDate().equals(request.getExpirationDate()) ||
                     !Objects.equals(batchProduct.getProductSkuCode(), request.getSkuCode())) {
@@ -98,6 +98,58 @@ public class ImportGoodsProcessor {
         return new ServiceResponse(response,"Nhập kho thành công", 200);
     }
 
+    @Transactional
+    public ServiceResponse exportGoods(RfidDTO request){
+        Users myAccount = utils.getMyUser();
+        ImportProcessResponse response = new ImportProcessResponse();
+        verifyExportGoodRequest(request);
+        // Change Packet Status
+        Packet packet = (Packet) packetService.exportPacket(request.getRfidCode()).getData();
+        BatchProduct batchProduct = batchService.getBatchById(packet.getBatchId());
+        Optional<ProductsLog> oProductsLog = productLogService.findByStatusActionAndBatchId(
+                Constant.ProductLogStatus.PENDING.name(),
+                Constant.ProductLogAction.EXPORT.name(),
+                packet.getBatchId()
+        );
+
+        // Create or Import Batch
+//        BatchProduct batchProduct;
+        ProductsLog productsLog = new ProductsLog();
+        ProductLogDTO productLogDTO = new ProductLogDTO();
+        if(batchProduct == null){
+            throw new AppException(ErrorCode.BATCH_NOT_FOUND);
+        }else {
+            batchProduct.setQuantity(batchProduct.getQuantity() - 1);
+        }
+        batchProduct = batchService.save(batchProduct);
+
+        if(oProductsLog.isEmpty()){
+            productLogDTO.setBatchProductId(batchProduct.getId());
+            productLogDTO.setAction(Constant.ProductLogAction.EXPORT.name());
+            productLogDTO.setStatus(Constant.ProductLogStatus.PENDING.name());
+            productsLog = productLogService.createLog(productLogDTO);
+        }else{
+            productsLog = oProductsLog.get();
+        }
+        productLogDTO = productMapper.fromEntityToLogDTO(productsLog);
+
+
+        // Write Log
+        productLogDTO.getPackets().add(packet);
+        productLogDTO.setQuantity(productLogDTO.getQuantity() + 1);
+        productsLog = productLogService.updateLog(productLogDTO);
+
+        response.setBatchId(batchProduct.getId());
+        response.setImportDate(LocalDate.from(productsLog.getCreatedDate()));
+        response.setSkuCode(request.getSkuCode());
+        response.setManufacturerDate(batchProduct.getManufacturerDate());
+        response.setExpirationDate(batchProduct.getExpirationDate());
+        response.setQuantity(batchProduct.getQuantity());
+        response.setWarehouseName(wareHouseService.getById(myAccount.getWarehouseId()).getName());
+
+        return new ServiceResponse(response,"Xuất kho thành công", 200);
+    }
+
     private void verifyImportGoodRequest(RfidDTO request){
         if(request == null || request.getSkuCode() == null || request.getBatchId() == null){
             throw new AppException(ErrorCode.INVALID_RFID_TAG);
@@ -111,5 +163,11 @@ public class ImportGoodsProcessor {
             throw new AppException(ErrorCode.PACKET_ALREADY_IMPORTED);
         }
 
+    }
+
+    private void verifyExportGoodRequest(RfidDTO request){
+        if(request == null || request.getRfidCode() == null){
+            throw new AppException(ErrorCode.INVALID_RFID_TAG);
+        }
     }
 }

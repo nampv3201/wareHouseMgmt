@@ -1,5 +1,7 @@
 package com.datn.warehousemgmt.utils;
 
+import lombok.Getter;
+
 public class Constant {
     public static final String ADMIN_ROLE = "ADMIN";
 
@@ -13,17 +15,21 @@ public class Constant {
         EXPORT;
     }
 
+    @Getter
     public enum PacketStatus{
         IN_STOCK("Đã nhập kho"),
         EXPORTED("Đã xuất kho");
-        private String status;
+
+        private final String status;
 
         PacketStatus(String status) {
             this.status = status;
         }
 
-        public String getStatus() {
-            return status;
-        }
+    }
+
+    public enum MerchantType {
+        SUPPLIER,
+        BUYER;
     }
 }

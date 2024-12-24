@@ -18,5 +18,6 @@ public class ProductLogDTO {
     Integer quantity;
     String action;
     String status;
+    Long merchantId;
     List<Packet> packets = new ArrayList<>();
 }

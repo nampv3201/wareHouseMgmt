@@ -4,6 +4,7 @@ import com.datn.warehousemgmt.dto.ImportDetail;
 import com.datn.warehousemgmt.dto.ProductDTO;
 import com.datn.warehousemgmt.dto.ServiceResponse;
 import com.datn.warehousemgmt.dto.request.ProductRequest;
+import com.datn.warehousemgmt.dto.request.UserSearchRequest;
 import com.datn.warehousemgmt.dto.response.ResponseImportModel;
 import com.datn.warehousemgmt.entities.Category;
 import com.datn.warehousemgmt.entities.Product;
@@ -51,9 +52,9 @@ public class ProductServiceImpl implements ProductService {
         SecurityContextHolder.getContext().getAuthentication();
         StringBuilder code = new StringBuilder();
         Random r = new Random();
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < 8; i++) {
             code.append(alphabet.charAt(r.nextInt(alphabet.length())));
-            if(i==4 || i==8){
+            if(i==4){
                 code.append("-");
             }
         }

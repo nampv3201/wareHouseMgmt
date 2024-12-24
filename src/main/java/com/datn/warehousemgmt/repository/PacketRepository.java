@@ -16,4 +16,6 @@ public interface PacketRepository extends JpaRepository<Packet, Long> {
 
     @Query(value = "SELECT pl.packets FROM ProductsLog pl WHERE pl.id = ?1")
     List<Packet> getPacketList(Long productLogId);
+
+    Packet findByRfidTag(String rfidTag);
 }

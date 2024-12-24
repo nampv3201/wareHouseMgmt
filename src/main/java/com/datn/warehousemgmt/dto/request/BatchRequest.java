@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
 
 @Data
@@ -19,4 +20,6 @@ public class BatchRequest {
     PageDTO pageDTO;
     Long supplierId;
     String status;
+    BigInteger inPrice;
+    BigInteger outPrice;
 }

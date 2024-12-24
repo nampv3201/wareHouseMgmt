@@ -1,5 +1,6 @@
 package com.datn.warehousemgmt.utils;
 
+import com.datn.warehousemgmt.dto.request.UserSearchRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

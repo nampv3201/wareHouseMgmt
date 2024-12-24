@@ -21,8 +21,8 @@ import java.util.Map;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
-    @Mapping(source = "categories", target = "categoryList",
-            qualifiedByName = "mapCategoryNames")
+//    @Mapping(source = "categories", target = "categoryList",
+//            qualifiedByName = "mapCategoryNames")
     ProductDTO productToProductDTO(Product product);
 
     Product productDTOToProduct(ProductDTO productDTO);
@@ -44,6 +44,7 @@ public interface ProductMapper {
         productLogDTO.setQuantity(productsLog.getQuantity());
         productLogDTO.setAction(productsLog.getAction());
         productLogDTO.setStatus(productsLog.getStatus());
+        productLogDTO.setMerchantId(productsLog.getMerchant() == null ? null : productsLog.getMerchant().getId());
         productLogDTO.setPackets(new ArrayList<>(productsLog.getPackets()));
         return productLogDTO;
     };
