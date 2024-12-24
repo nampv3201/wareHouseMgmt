@@ -26,4 +26,12 @@ public class ServiceResponse {
         this.data = data;
     }
 
+    public ServiceResponse(Object data, String message, Integer code, Integer totalPage, Long totalItem, Integer currentPage){
+        this.message = message;
+        this.code = code;
+        this.data = data;
+        this.totalPage = totalPage;
+        this.totalItem = totalItem;
+        this.currentPage = currentPage;
+    }
 }

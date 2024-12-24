@@ -3,6 +3,8 @@ package com.datn.warehousemgmt.controller;
 import com.datn.warehousemgmt.dto.ServiceResponse;
 import com.datn.warehousemgmt.dto.UserDTO;
 import com.datn.warehousemgmt.service.AuthenticationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +18,12 @@ import javax.xml.transform.OutputKeys;
 @RestController
 @RequestMapping("/api/authentication")
 @RequiredArgsConstructor
+@Tag(name = "API Authentication")
 public class AuthenController {
 
     private final AuthenticationService authenticationService;
 
+    @Operation(summary = "Đăng nhập")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDTO dto){
         try{

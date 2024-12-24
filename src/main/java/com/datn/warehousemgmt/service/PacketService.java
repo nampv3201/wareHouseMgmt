@@ -7,7 +7,7 @@ public interface PacketService {
 
     ServiceResponse importPacket(PacketDTO dto);
 
-    ServiceResponse exportPacket();
+    ServiceResponse exportPacket(String rfid);
 
     ServiceResponse updatePacket();
 

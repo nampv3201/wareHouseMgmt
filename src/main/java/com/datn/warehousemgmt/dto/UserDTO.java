@@ -1,5 +1,6 @@
 package com.datn.warehousemgmt.dto;
 
+import com.datn.warehousemgmt.utils.PageDTO;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;

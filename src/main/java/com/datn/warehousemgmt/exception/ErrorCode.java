@@ -42,11 +42,14 @@ public enum ErrorCode {
     IMPORT_GOODS_LIST_EMPTY(0, "Không có nhận diện được hàng hóa nhập", HttpStatus.BAD_REQUEST),
     INVALID_RFID_TAG(0, "Thẻ không hợp lệ", HttpStatus.BAD_REQUEST),
     PACKET_ALREADY_IMPORTED(0, "Packet đã tồn tại trong kho", HttpStatus.BAD_REQUEST),
+    PACKET_ALREADY_EXPORTED(0, "Packet đã xuất kho", HttpStatus.BAD_REQUEST),
+    PACKET_NOT_FOUND(0, "Packet không tồn tại", HttpStatus.BAD_REQUEST),
 
     IMPORT_TICKET_NOT_FOUND(0, "Không tìm thấy phiếu nhập", HttpStatus.BAD_REQUEST),
 
     WARE_HOUSE_NOT_EXIST(0, "Không tìm thấy thông tin kho hàng", HttpStatus.BAD_REQUEST),
 
+    MERCHANT_NOT_FOUND(0, "Không tìm thấy thông tin đối tác", HttpStatus.BAD_REQUEST),
     ;
 
 

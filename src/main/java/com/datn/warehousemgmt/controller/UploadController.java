@@ -3,6 +3,8 @@ package com.datn.warehousemgmt.controller;
 import com.datn.warehousemgmt.exception.AppException;
 import com.datn.warehousemgmt.service.CloudinaryService;
 import com.datn.warehousemgmt.utils.UploadUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/upload")
 @RequiredArgsConstructor
+@Tag(name = "API upload file")
 public class UploadController {
 
     private final UploadUtils uploadUtils;
@@ -23,6 +26,7 @@ public class UploadController {
     @Autowired
     private CloudinaryService cloudinaryService;
 
+    @Operation(summary = "Upload ảnh cho mặt hàng")
     @PostMapping("/sku-image")
     public ResponseEntity<?> uploadAvt(@RequestParam("file") MultipartFile file) {
         try {
@@ -33,6 +37,7 @@ public class UploadController {
         }
     }
 
+    @Operation(summary = "Upload excel file")
     @PostMapping("/excel-file")
     public ResponseEntity<?> uploadExcel(MultipartFile file){
         try {

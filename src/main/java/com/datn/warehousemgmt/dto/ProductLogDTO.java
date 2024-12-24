@@ -13,9 +13,11 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductLogDTO {
     Long id;
-    BatchProduct batchProduct;
+    Long batchProductId;
+    String supplierName;
     Integer quantity;
     String action;
     String status;
+    Long merchantId;
     List<Packet> packets = new ArrayList<>();
 }

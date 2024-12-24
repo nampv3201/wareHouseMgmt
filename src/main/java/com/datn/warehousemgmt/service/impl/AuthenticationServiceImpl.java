@@ -3,6 +3,7 @@ package com.datn.warehousemgmt.service.impl;
 import com.datn.warehousemgmt.dto.IntrospectDTO;
 import com.datn.warehousemgmt.dto.ServiceResponse;
 import com.datn.warehousemgmt.dto.UserDTO;
+import com.datn.warehousemgmt.entities.Permission;
 import com.datn.warehousemgmt.entities.Users;
 import com.datn.warehousemgmt.exception.AppException;
 import com.datn.warehousemgmt.exception.ErrorCode;
@@ -16,12 +17,7 @@ import com.nimbusds.jwt.SignedJWT;
 import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.NonFinal;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,9 +26,9 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -90,6 +86,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .jwtID(UUID.randomUUID().toString())
                 .claim("id", users.getId())
                 .claim("username", users.getUsername())
+                .claim("role", getRole(users))
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -132,5 +129,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         return signedJWT;
+    }
+
+    private String getRole(Users users){
+        return Optional.ofNullable(users.getPermissions())
+                .filter(permissions -> !permissions.isEmpty())
+                .map(permissions -> permissions.stream()
+                        .map(Permission::getName)
+                        .collect(Collectors.joining(" ")))
+                .orElse("");
     }
 }

@@ -23,7 +23,7 @@ public class ProductsLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "batch_product_id", referencedColumnName = "id")
     BatchProduct batchProduct;
 
@@ -42,7 +42,11 @@ public class ProductsLog {
     @Column(name = "status")
     String status;
 
-    @ManyToMany
+    @ManyToOne
+    @JoinColumn(name = "merchant_id", referencedColumnName = "id")
+    Merchant merchant;
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "log_details",
             joinColumns = @JoinColumn(name = "product_log_id"),
             inverseJoinColumns = @JoinColumn(name = "packet_id"))

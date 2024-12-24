@@ -1,12 +1,10 @@
 package com.datn.warehousemgmt.utils;
 
 import com.datn.warehousemgmt.dto.ImportDetail;
-import com.datn.warehousemgmt.dto.ProductDTO;
 import com.datn.warehousemgmt.dto.request.ProductRequest;
 import com.datn.warehousemgmt.entities.Product;
 import com.datn.warehousemgmt.exception.AppException;
 import com.datn.warehousemgmt.exception.ErrorCode;
-import com.datn.warehousemgmt.mapper.ProductMapper;
 import com.datn.warehousemgmt.repository.CategoryRepository;
 import com.datn.warehousemgmt.repository.ProductRepository;
 import jakarta.transaction.Transactional;
@@ -20,11 +18,9 @@ import org.apache.commons.io.input.BOMInputStream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.print.DocFlavor;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Component

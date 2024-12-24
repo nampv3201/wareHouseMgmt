@@ -1,9 +1,11 @@
 package com.datn.warehousemgmt.dto.request;
 
+import com.datn.warehousemgmt.utils.PageDTO;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
 
 @Data
@@ -15,4 +17,9 @@ public class BatchRequest {
     LocalDate manufacturerDate;
     LocalDate expirationDate;
     Long warehouseId;
+    PageDTO pageDTO;
+    Long supplierId;
+    String status;
+    BigInteger inPrice;
+    BigInteger outPrice;
 }

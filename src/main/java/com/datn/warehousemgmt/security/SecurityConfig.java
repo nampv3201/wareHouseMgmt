@@ -23,7 +23,8 @@ public class SecurityConfig{
 
     private final CustomJwtDecoder customJwtDecoder;
     private final String[] PUBLIC_ENDPOINTS = {
-            "/api/authentication/**",
+            "/api/authentication/**", "/swagger-ui/**", "/v3/api-docs/**", "/proxy/**",
+            "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs",
     };
 
     @Bean
