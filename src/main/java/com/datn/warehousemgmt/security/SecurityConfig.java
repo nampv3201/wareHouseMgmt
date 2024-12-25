@@ -23,8 +23,9 @@ public class SecurityConfig{
 
     private final CustomJwtDecoder customJwtDecoder;
     private final String[] PUBLIC_ENDPOINTS = {
-            "/api/authentication/**", "/swagger-ui/**", "/v3/api-docs/**", "/proxy/**",
-            "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs",
+//            "/api/authentication/**", "/swagger-ui/**", "/v3/api-docs/**", "/proxy/**",
+//            "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs",
+            "/**"
     };
 
     @Bean
@@ -32,7 +33,8 @@ public class SecurityConfig{
         httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(PUBLIC_ENDPOINTS)
                 .permitAll()
                 .anyRequest()
-                .authenticated());
+                .authenticated())
+        ;
 
         httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer
                         .decoder(customJwtDecoder)

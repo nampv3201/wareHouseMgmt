@@ -15,4 +15,5 @@ public class RfidDTO {
     LocalDate manufacturerDate;
     LocalDate expirationDate;
     Integer quantity;
+    Integer action;
 }

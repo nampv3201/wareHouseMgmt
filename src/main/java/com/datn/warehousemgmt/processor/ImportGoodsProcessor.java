@@ -32,6 +32,17 @@ public class ImportGoodsProcessor {
     private final ProductMapper productMapper;
 
     @Transactional
+    public ServiceResponse executeTask(RfidDTO request){
+        if(Objects.equals(request.getAction(), Constant.ProductLogAction.IMPORT.getAction())){
+            return importGoods(request);
+        }else if(Objects.equals(request.getAction(), Constant.ProductLogAction.EXPORT.getAction())){
+            return exportGoods(request);
+        }
+
+        throw new AppException(ErrorCode.ACTION_NOT_DEFINE);
+    }
+
+    @Transactional
     public ServiceResponse importGoods(RfidDTO request){
         Users myAccount = utils.getMyUser();
         ImportProcessResponse response = new ImportProcessResponse();

@@ -10,9 +10,16 @@ public class Constant {
         CLOSED;
     }
 
+    @Getter
     public enum ProductLogAction {
-        IMPORT,
-        EXPORT;
+        IMPORT(1),
+        EXPORT(0);
+
+        private final Integer action;
+
+        ProductLogAction(Integer action) {
+            this.action = action;
+        }
     }
 
     @Getter

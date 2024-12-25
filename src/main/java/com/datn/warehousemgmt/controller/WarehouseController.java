@@ -32,4 +32,10 @@ public class WarehouseController {
     public ResponseEntity<?> exportGoods(@RequestBody RfidDTO request){
         return new ResponseEntity<>(importGoodsProcessor.exportGoods(request), HttpStatus.OK);
     }
+
+    @Operation(summary = "Nhập/xuất kho")
+    @PostMapping("/do-task")
+    public ResponseEntity<?> doTask(@RequestBody RfidDTO request){
+        return new ResponseEntity<>(importGoodsProcessor.executeTask(request), HttpStatus.OK);
+    }
 }
