@@ -22,4 +22,8 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
             "OR u.phoneNumber like ?1) " +
             "AND (?2 IS NULL OR u.warehouseId = ?2)")
     Page<Users> getAllUser(String search, Long warehouseId, Pageable pageable);
+
+    Boolean existsUsersByEmail(String email);
+
+    Boolean existsUsersByUsername(String username);
 }

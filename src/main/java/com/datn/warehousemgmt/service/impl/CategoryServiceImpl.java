@@ -17,6 +17,12 @@ import java.util.Optional;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+
+    @Override
+    public ServiceResponse getAllCategories() {
+        return new ServiceResponse(categoryRepository.findAll(), "Lấy danh sách thành công", 200);
+    }
+
     @Override
     public ServiceResponse createCategory(CategoryDTO dto) {
         Category category = new Category();

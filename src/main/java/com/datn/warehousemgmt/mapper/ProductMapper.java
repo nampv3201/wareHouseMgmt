@@ -21,8 +21,8 @@ import java.util.Map;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
-//    @Mapping(source = "categories", target = "categoryList",
-//            qualifiedByName = "mapCategoryNames")
+    @Mapping(source = "categories", target = "categoryList",
+            qualifiedByName = "mapCategoryNames")
     ProductDTO productToProductDTO(Product product);
 
     Product productDTOToProduct(ProductDTO productDTO);

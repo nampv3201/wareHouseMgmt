@@ -4,6 +4,7 @@ import com.datn.warehousemgmt.entities.Permission;
 import com.datn.warehousemgmt.entities.Users;
 import com.datn.warehousemgmt.exception.AppException;
 import com.datn.warehousemgmt.exception.ErrorCode;
+import com.datn.warehousemgmt.repository.PermissionRepository;
 import com.datn.warehousemgmt.repository.UsersRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 public class UserUtils {
 
     private final UsersRepository usersRepository;
+    private final PermissionRepository permissionRepository;
 
     public Users getMyUser() {
         Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -30,7 +32,7 @@ public class UserUtils {
 
     public boolean isAdmin() {
         Users user = getMyUser();
-        return user.getPermissions()
+        return permissionRepository.getPermissionOfUser(user.getId())
                 .stream()
                 .map(Permission::getName)
                 .collect(Collectors.toSet())

@@ -13,8 +13,11 @@ import com.datn.warehousemgmt.utils.PageUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,28 +25,22 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-    private final UsersRepository usersRepository;
+    @Value("${application.default.password}")
+    private String defaultPassword;
 
-    @Override
-    public ServiceResponse create(UserDTO dto) {
-        ServiceResponse res = new ServiceResponse("Tạo user thành công", 200);
-        try{
-            Users user = new Users();
-            BeanUtils.copyProperties(dto, user);
-            res.setData(usersRepository.save(user));
-            return res;
-        }catch (Exception ex){
-            return new ServiceResponse("Tạo user thất bại: " + ex.getMessage(), 400);
-        }
-    }
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    private final UsersRepository usersRepository;
 
     @Override
     public ServiceResponse update(Long userId, UserDTO dto) {
         ServiceResponse res = new ServiceResponse("Chỉnh sửa thông tin thành công", 200);
         try{
             Users user = usersRepository.findById(userId)
-                    .orElseThrow(() -> new RuntimeException("User không tồn tại"));
-            user.setName(dto.getName());
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            BeanUtils.copyProperties(dto, user);
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
             res.setData(usersRepository.save(user));
             return res;
         }catch (Exception ex){
@@ -56,7 +53,7 @@ public class UserServiceImpl implements UserService {
         ServiceResponse res = new ServiceResponse("Xóa thành công", 200);
         try{
             Users user = usersRepository.findById(uId)
-                    .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
             usersRepository.delete(user);
             return res;
         }catch (Exception ex){

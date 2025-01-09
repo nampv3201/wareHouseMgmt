@@ -1,5 +1,6 @@
 package com.datn.warehousemgmt.controller;
 
+import com.datn.warehousemgmt.dto.IntrospectDTO;
 import com.datn.warehousemgmt.dto.ServiceResponse;
 import com.datn.warehousemgmt.dto.UserDTO;
 import com.datn.warehousemgmt.service.AuthenticationService;
@@ -23,6 +24,12 @@ public class AuthenController {
 
     private final AuthenticationService authenticationService;
 
+    @Operation(summary = "Tạo tài khoản mới")
+    @PostMapping()
+    public ResponseEntity<ServiceResponse> createUser(@RequestBody UserDTO dto){
+        return ResponseEntity.ok(authenticationService.create(dto));
+    }
+
     @Operation(summary = "Đăng nhập")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDTO dto){
@@ -32,5 +39,11 @@ public class AuthenController {
             ServiceResponse response = new ServiceResponse(e.getMessage(), 401);
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    @Operation(summary = "Đăng nhập")
+    @PostMapping("/logout")
+    public ResponseEntity<?> login(@RequestBody IntrospectDTO request){
+        return ResponseEntity.ok(authenticationService.logout(request));
     }
 }

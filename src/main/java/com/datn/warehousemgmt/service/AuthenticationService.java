@@ -11,7 +11,9 @@ public interface AuthenticationService {
 
     public ServiceResponse login(UserDTO dto);
 
-    public ServiceResponse logout(UserDTO dto);
+    public ServiceResponse logout(IntrospectDTO dto);
+
+    public ServiceResponse create(UserDTO dto);
 
     public ServiceResponse changePassword();
 

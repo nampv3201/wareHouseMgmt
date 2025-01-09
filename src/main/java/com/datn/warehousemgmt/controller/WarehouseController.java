@@ -8,8 +8,10 @@ import com.datn.warehousemgmt.service.ProductLogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class WarehouseController {
     private final ImportGoodsProcessor importGoodsProcessor;
     private final ProductLogService productLogService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Operation(summary = "Nhập kho")
     @PostMapping("/import-goods")
@@ -36,6 +39,9 @@ public class WarehouseController {
     @Operation(summary = "Nhập/xuất kho")
     @PostMapping("/do-task")
     public ResponseEntity<?> doTask(@RequestBody RfidDTO request){
-        return new ResponseEntity<>(importGoodsProcessor.executeTask(request), HttpStatus.OK);
+        ServiceResponse res = importGoodsProcessor.executeTask(request);
+
+        messagingTemplate.convertAndSend("/topic/product/log", res);
+        return new ResponseEntity<>(res, HttpStatus.OK);
     }
 }

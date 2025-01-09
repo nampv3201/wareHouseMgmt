@@ -6,6 +6,8 @@ import com.datn.warehousemgmt.entities.Category;
 
 public interface CategoryService {
 
+    ServiceResponse getAllCategories();
+
     ServiceResponse createCategory(CategoryDTO dto);
 
     ServiceResponse updateCategory(CategoryDTO dto);

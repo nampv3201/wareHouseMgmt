@@ -10,10 +10,7 @@ import com.datn.warehousemgmt.entities.*;
 import com.datn.warehousemgmt.exception.AppException;
 import com.datn.warehousemgmt.exception.ErrorCode;
 import com.datn.warehousemgmt.mapper.ProductMapper;
-import com.datn.warehousemgmt.repository.BatchProductRepository;
-import com.datn.warehousemgmt.repository.MerchantRepository;
-import com.datn.warehousemgmt.repository.PacketRepository;
-import com.datn.warehousemgmt.repository.ProductLogRepository;
+import com.datn.warehousemgmt.repository.*;
 import com.datn.warehousemgmt.service.ProductLogService;
 import com.datn.warehousemgmt.utils.*;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,6 +37,7 @@ public class ProductLogServiceImpl implements ProductLogService {
     private final BatchProductRepository batchProductRepository;
     private final PacketRepository packetRepository;
     private final MerchantRepository merchantRepository;
+    private final PermissionRepository permissionRepository;
 
     private final UserUtils utils;
     private final ProductMapper productMapper;
@@ -98,8 +96,11 @@ public class ProductLogServiceImpl implements ProductLogService {
         try {
             Users u = utils.getMyUser();
             Pageable pageable = PageUtils.customPage(request.getPageDTO());
-            if(u.getPermissions().stream().map(Permission::getName)
-                    .toList().contains(Constant.ADMIN_ROLE)){
+            if(permissionRepository.getPermissionOfUser(u.getId())
+                    .stream()
+                    .map(Permission::getName)
+                    .toList()
+                    .contains(Constant.ADMIN_ROLE)){
                 u.setWarehouseId(null);
             }
             Page<Map<String, Object> > page = productLogRepository.findLog(request.getSearch(),

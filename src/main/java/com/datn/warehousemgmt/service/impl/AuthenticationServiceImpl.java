@@ -3,10 +3,14 @@ package com.datn.warehousemgmt.service.impl;
 import com.datn.warehousemgmt.dto.IntrospectDTO;
 import com.datn.warehousemgmt.dto.ServiceResponse;
 import com.datn.warehousemgmt.dto.UserDTO;
+import com.datn.warehousemgmt.dto.response.AuthenticationResponse;
+import com.datn.warehousemgmt.entities.InvalidateToken;
 import com.datn.warehousemgmt.entities.Permission;
 import com.datn.warehousemgmt.entities.Users;
 import com.datn.warehousemgmt.exception.AppException;
 import com.datn.warehousemgmt.exception.ErrorCode;
+import com.datn.warehousemgmt.repository.InvalidateTokenRepository;
+import com.datn.warehousemgmt.repository.PermissionRepository;
 import com.datn.warehousemgmt.repository.UsersRepository;
 import com.datn.warehousemgmt.service.AuthenticationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,10 +22,13 @@ import com.nimbusds.jwt.SignedJWT;
 import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.NonFinal;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -37,6 +44,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
 
+    private final InvalidateTokenRepository invalidateTokenRepository;
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
@@ -44,6 +52,29 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);;
 
     private final UsersRepository usersRepository;
+    private final PermissionRepository permissionRepository;
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public ServiceResponse create(UserDTO dto) {
+        if(usersRepository.existsUsersByUsername(dto.getUsername())){
+            throw new AppException(ErrorCode.USERNAME_ALREADY_EXISTS);
+        }
+        if(usersRepository.existsUsersByEmail(dto.getEmail())){
+            throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
+        }
+
+        ServiceResponse res = new ServiceResponse("Tạo tài khoản thành công", 200);
+        try{
+            Users user = new Users();
+            BeanUtils.copyProperties(dto, user);
+            user.setStatus(true);
+            res.setData(usersRepository.save(user));
+            return res;
+        }catch (Exception ex){
+            return new ServiceResponse("Tạo tài khoản thất bại: " + ex.getMessage(), 400);
+        }
+    }
 
     @Override
     public ServiceResponse login(UserDTO dto) {
@@ -56,8 +87,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 throw new AppException(ErrorCode.UNAUTHENTICATED);
             }
             var token = generateToken(user.get());
+            AuthenticationResponse res = AuthenticationResponse.builder()
+                    .username(user.get().getUsername())
+                    .token(token)
+                    .role(getRole(user.get()))
+                    .build();
 
-            return new ServiceResponse(token, "Đăng nhập thành công", 200);
+            return new ServiceResponse(res, "Đăng nhập thành công", 200);
         }catch (NoResultException e) {
             throw new AppException(ErrorCode.INVALID_ACCOUNT);
         }catch (Exception e) {
@@ -66,9 +102,25 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public ServiceResponse logout(UserDTO dto) {
+    public ServiceResponse logout(IntrospectDTO request) {
+        try {
+            var signToken = verifyToken(request.getToken(), true);
 
-        return null;
+            String jit = signToken.getJWTClaimsSet().getJWTID();
+            Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+
+            InvalidateToken invalidateToken = new InvalidateToken();
+            invalidateToken.setId(jit);
+            invalidateToken.setExpiryTime(expiryTime);
+
+            invalidateTokenRepository.save(invalidateToken);
+
+            return new ServiceResponse("Đăng xuất thành công", 200);
+        } catch (JOSEException e) {
+            throw new RuntimeException(e);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -89,7 +141,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .jwtID(UUID.randomUUID().toString())
                 .claim("id", users.getId())
                 .claim("username", users.getUsername())
-                .claim("role", getRole(users))
+                .claim("scope", getRole(users))
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -135,11 +187,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     private String getRole(Users users){
-        return Optional.ofNullable(users.getPermissions())
-                .filter(permissions -> !permissions.isEmpty())
-                .map(permissions -> permissions.stream()
-                        .map(Permission::getName)
-                        .collect(Collectors.joining(" ")))
-                .orElse("");
+        StringJoiner joiner = new StringJoiner(" ");
+        List<Permission> permissionList = permissionRepository.getPermissionOfUser(users.getId());
+        if(!CollectionUtils.isEmpty(permissionList)){
+            for(Permission p : permissionList){
+                joiner.add(p.getName());
+            }
+        }
+        return joiner.toString();
     }
 }

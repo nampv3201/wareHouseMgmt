@@ -5,6 +5,9 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @Entity
 @Table(name = "permission")
@@ -17,4 +20,10 @@ public class Permission {
 
     @Column(name = "name")
     String name;
+
+    @ManyToMany
+    @JoinTable(name = "user_permission",
+            joinColumns = @JoinColumn(name = "permission_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private List<Users> users = new ArrayList<>();
 }

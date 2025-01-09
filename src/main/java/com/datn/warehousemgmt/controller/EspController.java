@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,7 +52,7 @@ public class EspController {
     @PostMapping("/send-action")
     public ResponseEntity<?> sendAction(@RequestBody Map<String, String> payload) {
         try {
-            String token = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+            String token = ((Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getTokenValue();
             HttpClient httpClient = HttpClient.newHttpClient();
             payload.put("token", token);
 

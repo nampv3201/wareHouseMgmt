@@ -153,7 +153,12 @@ public class ProductServiceImpl implements ProductService {
         ServiceResponse response = new ServiceResponse("Không tìm thấy sản phẩm", 200);
         try{
             Pageable pageable = PageUtils.customPage(request.getPageDTO());
-            Page<Product> page = productRepository.getProduct(request.getSearch(), pageable);
+            if(request.getCategoryIds().isEmpty()){
+                request.setCategoryIds(null);
+            }
+            Page<Product> page = productRepository.getProduct(request.getSearch(),
+                    request.getCategoryIds(),
+                    pageable);
             if(!page.getContent().isEmpty()){
                 List<ProductDTO> dto = new ArrayList<>();
                 page.getContent().forEach(product -> {

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -14,7 +15,7 @@ import java.util.Date;
 public class UserDTO {
     String name;
     String email;
-    Date birthday;
+    LocalDate birthday;
     String username;
     String password;
     String phoneNumber;

@@ -9,17 +9,23 @@ import com.datn.warehousemgmt.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/product")
 @RequiredArgsConstructor
 @Tag(name = "API sản phẩm")
+@Slf4j
 public class ProductController {
 
     private final ProductService productService;
+
 
     @Operation(summary = "API sinh mã sản phẩm")
     @GetMapping("/genId")
@@ -33,24 +39,28 @@ public class ProductController {
         return new ResponseEntity<>(productService.getOne(skuCode), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Tạo sản phẩm mới")
     @PostMapping
     public ResponseEntity<?> createProduct(@RequestBody ProductRequest dto){
         return new ResponseEntity<>(productService.createProduct(dto), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Cập nhật thông tin sản phẩm")
     @PutMapping
     public ResponseEntity<?> updateProduct(@RequestBody ProductRequest dto){
         return new ResponseEntity<>(productService.updateProduct(dto), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Xóa sản phẩm")
     @DeleteMapping
     public ResponseEntity<?> deleteProduct(@RequestBody ProductRequest dto){
         return new ResponseEntity<>(productService.deleteProduct(dto), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Import sản phẩm từ file csv")
     @PostMapping("/import")
     public ResponseEntity<?> importProduct(@RequestBody ImportRequest request){

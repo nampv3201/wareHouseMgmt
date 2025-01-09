@@ -8,16 +8,21 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(value = "SELECT p FROM Product p " +
+            "join p.categories cat " +
             "WHERE (:search IS NULL " +
             "OR :search = '' " +
             "OR LOWER(p.name) LIKE concat('%', coalesce(:search, ''), '%') " +
-            "OR LOWER(p.skuCode) LIKE concat('%', coalesce(:search, ''), '%'))")
-    Page<Product> getProduct(@Param("search") String search, Pageable pageable);
+            "OR LOWER(p.skuCode) LIKE concat('%', coalesce(:search, ''), '%'))" +
+            "AND (:catIds IS NULL OR cat.id IN :catIds)")
+    Page<Product> getProduct(@Param("search") String search,
+                             @Param("catIds") List<Long> catIds,
+                             Pageable pageable);
 
     @Query(value = "SELECT p FROM Product p WHERE p.skuCode =  ?1")
     Optional<Product> findProductBySkuCode(String skuCode);

@@ -9,6 +9,8 @@ public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(0, "Có lỗi xảy ra", HttpStatus.INTERNAL_SERVER_ERROR),
 
     USER_EXISTED(0, "Tài khoản đã tồn tại", HttpStatus.BAD_REQUEST),
+    USERNAME_ALREADY_EXISTS(0, "Tên tài khoản đã được sử dụng", HttpStatus.BAD_REQUEST),
+    EMAIL_ALREADY_EXISTS(0, "Email đã được sử dụng", HttpStatus.BAD_REQUEST),
 
     USER_NOT_EXISTED(0, "Tài khoản không tồn tại", HttpStatus.NOT_FOUND),
 
@@ -52,6 +54,8 @@ public enum ErrorCode {
     MERCHANT_NOT_FOUND(0, "Không tìm thấy thông tin đối tác", HttpStatus.BAD_REQUEST),
 
     ACTION_NOT_DEFINE(0, "Không xác định được hành động", HttpStatus.BAD_REQUEST),
+
+    PERMISSION_NOT_FOUND(0, "Không tìm thấy quyền", HttpStatus.BAD_REQUEST),
     ;
 
 

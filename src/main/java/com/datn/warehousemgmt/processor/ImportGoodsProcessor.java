@@ -46,66 +46,67 @@ public class ImportGoodsProcessor {
     public ServiceResponse importGoods(RfidDTO request){
         Users myAccount = utils.getMyUser();
         ImportProcessResponse response = new ImportProcessResponse();
-        verifyImportGoodRequest(request);
-        BatchProduct batchProduct = batchService.getBatchById(request.getBatchId());
-        Optional<ProductsLog> oProductsLog = productLogService.findByStatusActionAndBatchId(
-                Constant.ProductLogStatus.PENDING.name(),
-                Constant.ProductLogAction.IMPORT.name(),
-                request.getBatchId()
-        );
+        if(verifyImportGoodRequest(request) == null) {
+            BatchProduct batchProduct = batchService.getBatchById(request.getBatchId());
+            Optional<ProductsLog> oProductsLog = productLogService.findByStatusActionAndBatchId(
+                    Constant.ProductLogStatus.PENDING.name(),
+                    Constant.ProductLogAction.IMPORT.name(),
+                    request.getBatchId()
+            );
 
-        // Create or Import Batch
+            // Create or Import Batch
 //        BatchProduct batchProduct;
-        ProductsLog productsLog = new ProductsLog();
-        ProductLogDTO productLogDTO = new ProductLogDTO();
-        if(batchProduct == null){
-            batchProduct = new BatchProduct();
-            batchProduct.setId(request.getBatchId());
-            batchProduct.setProductSkuCode(request.getSkuCode());
-            batchProduct.setManufacturerDate(request.getManufacturerDate());
-            batchProduct.setExpirationDate(request.getExpirationDate());
-            batchProduct.setWarehouseId(utils.getMyUser().getWarehouseId());
-            batchProduct.setQuantity(1);
-        }else {
-            if (!batchProduct.getManufacturerDate().equals(request.getManufacturerDate()) ||
-                    !batchProduct.getExpirationDate().equals(request.getExpirationDate()) ||
-                    !Objects.equals(batchProduct.getProductSkuCode(), request.getSkuCode())) {
-                throw new AppException(ErrorCode.BATCH_INFORMATION_NOT_MATCH);
+            ProductsLog productsLog = new ProductsLog();
+            ProductLogDTO productLogDTO = new ProductLogDTO();
+            if (batchProduct == null) {
+                batchProduct = new BatchProduct();
+                batchProduct.setId(request.getBatchId());
+                batchProduct.setProductSkuCode(request.getSkuCode());
+                batchProduct.setManufacturerDate(request.getManufacturerDate());
+                batchProduct.setExpirationDate(request.getExpirationDate());
+                batchProduct.setWarehouseId(utils.getMyUser().getWarehouseId());
+                batchProduct.setQuantity(1);
+            } else {
+                if (!batchProduct.getManufacturerDate().equals(request.getManufacturerDate()) ||
+                        !batchProduct.getExpirationDate().equals(request.getExpirationDate()) ||
+                        !Objects.equals(batchProduct.getProductSkuCode(), request.getSkuCode())) {
+                    throw new AppException(ErrorCode.BATCH_INFORMATION_NOT_MATCH);
+                }
+                batchProduct.setQuantity(batchProduct.getQuantity() + 1);
             }
-            batchProduct.setQuantity(batchProduct.getQuantity() + 1);
+            batchProduct = batchService.save(batchProduct);
+
+            if (!oProductsLog.isPresent()) {
+                productLogDTO.setBatchProductId(batchProduct.getId());
+                productLogDTO.setAction(Constant.ProductLogAction.IMPORT.name());
+                productLogDTO.setStatus(Constant.ProductLogStatus.PENDING.name());
+                productsLog = productLogService.createLog(productLogDTO);
+            } else {
+                productsLog = oProductsLog.get();
+            }
+            productLogDTO = productMapper.fromEntityToLogDTO(productsLog);
+            // Import Packet
+            PacketDTO packetDTO = new PacketDTO();
+            packetDTO.setRfidTag(request.getRfidCode());
+            packetDTO.setBatchId(batchProduct.getId());
+            packetDTO.setQuantity(request.getQuantity());
+            packetDTO.setStatus(Constant.PacketStatus.IN_STOCK.getStatus());
+            Packet packet = (Packet) packetService.importPacket(packetDTO).getData();
+
+            // Write Log
+            productLogDTO.getPackets().add(packet);
+            productLogDTO.setQuantity(productLogDTO.getQuantity() + 1);
+            productsLog = productLogService.updateLog(productLogDTO);
+
+            response.setBatchId(batchProduct.getId());
+            response.setImportDate(LocalDate.from(productsLog.getCreatedDate()));
+            response.setSkuCode(request.getSkuCode());
+            response.setManufacturerDate(batchProduct.getManufacturerDate());
+            response.setExpirationDate(batchProduct.getExpirationDate());
+            response.setQuantity(batchProduct.getQuantity());
+            response.setWarehouseName(wareHouseService.getById(myAccount.getWarehouseId()).getName());
+
         }
-        batchProduct = batchService.save(batchProduct);
-
-        if(!oProductsLog.isPresent()){
-            productLogDTO.setBatchProductId(batchProduct.getId());
-            productLogDTO.setAction(Constant.ProductLogAction.IMPORT.name());
-            productLogDTO.setStatus(Constant.ProductLogStatus.PENDING.name());
-            productsLog = productLogService.createLog(productLogDTO);
-        }else{
-            productsLog = oProductsLog.get();
-        }
-        productLogDTO = productMapper.fromEntityToLogDTO(productsLog);
-        // Import Packet
-        PacketDTO packetDTO = new PacketDTO();
-        packetDTO.setRfidTag(request.getRfidCode());
-        packetDTO.setBatchId(batchProduct.getId());
-        packetDTO.setQuantity(request.getQuantity());
-        packetDTO.setStatus(Constant.PacketStatus.IN_STOCK.getStatus());
-        Packet packet = (Packet) packetService.importPacket(packetDTO).getData();
-
-        // Write Log
-        productLogDTO.getPackets().add(packet);
-        productLogDTO.setQuantity(productLogDTO.getQuantity() + 1);
-        productsLog = productLogService.updateLog(productLogDTO);
-
-        response.setBatchId(batchProduct.getId());
-        response.setImportDate(LocalDate.from(productsLog.getCreatedDate()));
-        response.setSkuCode(request.getSkuCode());
-        response.setManufacturerDate(batchProduct.getManufacturerDate());
-        response.setExpirationDate(batchProduct.getExpirationDate());
-        response.setQuantity(batchProduct.getQuantity());
-        response.setWarehouseName(wareHouseService.getById(myAccount.getWarehouseId()).getName());
-
         return new ServiceResponse(response,"Nhập kho thành công", 200);
     }
 
@@ -161,19 +162,23 @@ public class ImportGoodsProcessor {
         return new ServiceResponse(response,"Xuất kho thành công", 200);
     }
 
-    private void verifyImportGoodRequest(RfidDTO request){
+    private ServiceResponse verifyImportGoodRequest(RfidDTO request){
         if(request == null || request.getSkuCode() == null || request.getBatchId() == null){
-            throw new AppException(ErrorCode.INVALID_RFID_TAG);
+            return new ServiceResponse(ErrorCode.INVALID_RFID_TAG.getMessage(), 400);
+//            throw new AppException(ErrorCode.INVALID_RFID_TAG);
         }
 
         if(!productService.existProductBySKUCode(request.getSkuCode())){
-            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+            return new ServiceResponse(ErrorCode.PRODUCT_NOT_FOUND.getMessage(), 400);
+//            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
         if(packetService.checkPacket(request.getRfidCode())){
-            throw new AppException(ErrorCode.PACKET_ALREADY_IMPORTED);
+            return new ServiceResponse(ErrorCode.PACKET_ALREADY_IMPORTED.getMessage(), 400);
+//            throw new AppException(ErrorCode.PACKET_ALREADY_IMPORTED);
         }
 
+        return null;
     }
 
     private void verifyExportGoodRequest(RfidDTO request){

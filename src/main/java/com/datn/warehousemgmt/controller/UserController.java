@@ -19,12 +19,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
 
-    @Operation(summary = "Tạo user mới")
-    @PostMapping()
-    public ResponseEntity<ServiceResponse> createUser(@RequestBody UserDTO dto){
-        return ResponseEntity.ok(userService.create(dto));
-    }
-
     @Operation(summary = "Cập nhật thông tin user")
     @PutMapping("/{uId}")
     public ResponseEntity<ServiceResponse> updateUser(@PathVariable Long uId, @RequestBody UserDTO dto){

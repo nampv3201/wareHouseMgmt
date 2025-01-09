@@ -45,10 +45,4 @@ public class Users {
 
     @Column(name = "ware_house_id")
     Long warehouseId;
-
-    @ManyToMany
-    @JoinTable(name = "user_permission",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "permission_id"))
-    private List<Permission> permissions = new ArrayList<>();
 }

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,17 +27,19 @@ public class UploadController {
     @Autowired
     private CloudinaryService cloudinaryService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Upload ảnh cho mặt hàng")
     @PostMapping("/sku-image")
     public ResponseEntity<?> uploadAvt(@RequestParam("file") MultipartFile file) {
         try {
             String url = (String) cloudinaryService.uploadFile(file).getData();
-            return ResponseEntity.ok().body("File uploaded successfully: " + url);
+            return ResponseEntity.ok().body(url);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error uploading file: " + e.getMessage());
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Upload excel file")
     @PostMapping("/excel-file")
     public ResponseEntity<?> uploadExcel(MultipartFile file){
