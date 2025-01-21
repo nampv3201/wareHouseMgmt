@@ -1,6 +1,5 @@
 package com.datn.warehousemgmt.dto;
 
-import com.datn.warehousemgmt.entities.BatchProduct;
 import com.datn.warehousemgmt.entities.Packet;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -18,6 +17,6 @@ public class ProductLogDTO {
     Integer quantity;
     String action;
     String status;
-    Long merchantId;
+    Long partnerId;
     List<Packet> packets = new ArrayList<>();
 }

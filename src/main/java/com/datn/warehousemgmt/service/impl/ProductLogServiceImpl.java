@@ -4,7 +4,6 @@ import com.datn.warehousemgmt.dto.ProductLogDTO;
 import com.datn.warehousemgmt.dto.ServiceResponse;
 import com.datn.warehousemgmt.dto.request.ExportLogRequest;
 import com.datn.warehousemgmt.dto.request.ProductLogSearchRequest;
-import com.datn.warehousemgmt.dto.request.UserSearchRequest;
 import com.datn.warehousemgmt.dto.response.ProductLogListResponse;
 import com.datn.warehousemgmt.entities.*;
 import com.datn.warehousemgmt.exception.AppException;
@@ -23,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,12 +34,13 @@ public class ProductLogServiceImpl implements ProductLogService {
     private final ProductLogRepository productLogRepository;
     private final BatchProductRepository batchProductRepository;
     private final PacketRepository packetRepository;
-    private final MerchantRepository merchantRepository;
+    private final PartnerRepository partnerRepository;
     private final PermissionRepository permissionRepository;
 
     private final UserUtils utils;
     private final ProductMapper productMapper;
     private final ExcelExport excelExport;
+    private final DownloadUtils downloadUtils;
 
     @Value("${excel.log.folder}")
     public String BASE_DIR;
@@ -80,10 +79,10 @@ public class ProductLogServiceImpl implements ProductLogService {
         try {
             ProductsLog productsLog = productLogRepository.findById(request.getId())
                     .orElseThrow(() -> new AppException(ErrorCode.IMPORT_TICKET_NOT_FOUND));
-            Merchant merchant = merchantRepository.findById(request.getMerchantId())
-                    .orElseThrow(() -> new AppException(ErrorCode.MERCHANT_NOT_FOUND));
+            Partner partner = partnerRepository.findById(request.getPartnerId())
+                    .orElseThrow(() -> new AppException(ErrorCode.PARTNER_NOT_FOUND));
             productsLog.setStatus(request.getStatus());
-            productsLog.setMerchant(merchant);
+            productsLog.setPartner(partner);
             productsLog = productLogRepository.save(productsLog);
             return new ServiceResponse("Cập nhật trạng thái thành công: " + productsLog.getStatus(), 200);
         }catch (Exception e){
@@ -139,7 +138,7 @@ public class ProductLogServiceImpl implements ProductLogService {
         try {
             String fileName = excelExport.writeExcelLog(request);
             File file = new File(BASE_DIR + fileName);
-            DownloadUtils.download(response, file);
+            downloadUtils.download(response, file);
             return new ServiceResponse("Xuất file Excel thành công", 200);
         }catch (IOException e){
             throw new AppException(ErrorCode.IO_EXCEPTION);

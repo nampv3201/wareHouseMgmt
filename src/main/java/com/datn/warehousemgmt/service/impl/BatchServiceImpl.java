@@ -2,7 +2,6 @@ package com.datn.warehousemgmt.service.impl;
 
 import com.datn.warehousemgmt.dto.ServiceResponse;
 import com.datn.warehousemgmt.dto.request.BatchRequest;
-import com.datn.warehousemgmt.dto.request.UserSearchRequest;
 import com.datn.warehousemgmt.entities.BatchProduct;
 import com.datn.warehousemgmt.exception.AppException;
 import com.datn.warehousemgmt.exception.ErrorCode;
@@ -31,7 +30,7 @@ public class BatchServiceImpl implements BatchService {
                     .orElseThrow(() -> new AppException(ErrorCode.BATCH_NOT_FOUND));
             batchProduct.setInPrice(batchRequest.getInPrice());
             batchProduct.setOutPrice(batchRequest.getOutPrice());
-            batchProduct.setSupplierId(batchRequest.getSupplierId());
+            batchProduct.setPartnerId(batchRequest.getPartnerId());
             batchProductRepository.save(batchProduct);
             return new ServiceResponse(batchProduct, "Cập nhật thành công", 200);
         }catch (Exception e) {
@@ -54,8 +53,14 @@ public class BatchServiceImpl implements BatchService {
     public ServiceResponse getBatchBySku(BatchRequest request) {
         Pageable pageable = PageUtils.customPage(request.getPageDTO());
         try {
+            if(request.getPartnerIds().isEmpty()){
+                request.setPartnerIds(null);
+            }
+            if(request.getStatus().equals("default")){
+                request.setStatus(null);
+            }
             Page<BatchProduct> page = batchProductRepository.getAllBySkuCode(request.getProductSkuCode(),
-                    request.getSupplierId(),
+                    request.getPartnerIds(),
                     request.getStatus(),
                     pageable);
             return new ServiceResponse(page.getContent(), "Lấy thông tin lô thành công", 200,

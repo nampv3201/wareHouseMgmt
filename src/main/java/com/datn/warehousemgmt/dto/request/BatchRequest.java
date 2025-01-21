@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -18,8 +19,9 @@ public class BatchRequest {
     LocalDate expirationDate;
     Long warehouseId;
     PageDTO pageDTO;
-    Long supplierId;
+    Long partnerId;
     String status;
     BigInteger inPrice;
     BigInteger outPrice;
+    List<Long> partnerIds;
 }

@@ -11,8 +11,8 @@ import java.util.List;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "merchant")
-public class Merchant {
+@Table(name = "partner")
+public class Partner {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +31,6 @@ public class Merchant {
     String type;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "supplier_id")
+    @JoinColumn(name = "partner_id")
     private List<BatchProduct> batchProducts = new ArrayList<>();
 }

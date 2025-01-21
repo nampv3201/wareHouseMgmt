@@ -43,8 +43,8 @@ public class ProductsLog {
     String status;
 
     @ManyToOne
-    @JoinColumn(name = "merchant_id", referencedColumnName = "id")
-    Merchant merchant;
+    @JoinColumn(name = "partner_id", referencedColumnName = "id")
+    Partner partner;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "log_details",

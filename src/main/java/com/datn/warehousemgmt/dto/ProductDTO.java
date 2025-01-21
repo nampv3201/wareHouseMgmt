@@ -18,5 +18,6 @@ public class ProductDTO {
     String name;
     String description;
     String imageLink;
+    List<Long> categoryIds = new ArrayList<>();
     List<String> categoryList = new ArrayList<>();
 }

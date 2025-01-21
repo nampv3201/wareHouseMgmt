@@ -25,7 +25,8 @@ public class Constant {
     @Getter
     public enum PacketStatus{
         IN_STOCK("Đã nhập kho"),
-        EXPORTED("Đã xuất kho");
+        EXPORTED("Đã xuất kho"),
+        CANCELED("Hủy bỏ");
 
         private final String status;
 
@@ -35,7 +36,7 @@ public class Constant {
 
     }
 
-    public enum MerchantType {
+    public enum PartnerType {
         SUPPLIER,
         BUYER;
     }

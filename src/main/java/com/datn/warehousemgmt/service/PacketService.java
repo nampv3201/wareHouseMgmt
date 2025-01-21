@@ -9,7 +9,7 @@ public interface PacketService {
 
     ServiceResponse exportPacket(String rfid);
 
-    ServiceResponse updatePacket();
+    ServiceResponse updatePacket(String rfid);
 
     Boolean checkPacket(String rfid);
 }

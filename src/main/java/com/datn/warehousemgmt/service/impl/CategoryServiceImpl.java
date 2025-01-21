@@ -19,8 +19,8 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Override
-    public ServiceResponse getAllCategories() {
-        return new ServiceResponse(categoryRepository.findAll(), "Lấy danh sách thành công", 200);
+    public ServiceResponse getAllCategories(String search) {
+        return new ServiceResponse(categoryRepository.getCategory(search), "Lấy danh sách thành công", 200);
     }
 
     @Override

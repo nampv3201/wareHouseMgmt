@@ -6,7 +6,7 @@ import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class MerchantDTO {
+public class PartnerDTO {
     Long id;
     String name;
     String address;

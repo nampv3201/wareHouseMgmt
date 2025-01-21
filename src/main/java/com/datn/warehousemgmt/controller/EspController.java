@@ -19,6 +19,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.Map;
 
 @RestController
@@ -53,12 +54,15 @@ public class EspController {
     public ResponseEntity<?> sendAction(@RequestBody Map<String, String> payload) {
         try {
             String token = ((Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getTokenValue();
-            HttpClient httpClient = HttpClient.newHttpClient();
+            HttpClient httpClient = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(5)) // Thiết lập thời gian chờ kết nối
+                    .build();
             payload.put("token", token);
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("http://192.168.1.134:81/action"))
                     .header("Content-Type", "application/json")
+                    .timeout(Duration.ofSeconds(15)) // Thiết lập thời gian chờ phản hồi
                     .POST(HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(payload)))
                     .build();
 

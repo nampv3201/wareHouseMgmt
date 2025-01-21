@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -60,7 +61,7 @@ public interface ProductLogRepository extends JpaRepository<ProductsLog, Long> {
             "FROM product_log pl " +
             "JOIN batch b ON pl.batch_product_id = b.id " +
             "JOIN product p ON b.product_sku_code = p.sku_code " +
-            "LEFT JOIN merchant m on pl.merchant_id = m.id " +
+            "LEFT JOIN partner m on pl.partner_id = m.id " +
             "WHERE " +
             "(?1 IS NULL OR ?1 = '' OR p.sku_code = ?1) " +
             "AND (?2 IS NULL OR ?2 = '' OR pl.batch_product_id = ?2) " +

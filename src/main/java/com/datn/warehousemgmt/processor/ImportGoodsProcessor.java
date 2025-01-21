@@ -99,6 +99,7 @@ public class ImportGoodsProcessor {
             productsLog = productLogService.updateLog(productLogDTO);
 
             response.setBatchId(batchProduct.getId());
+            response.setRfid(packet.getRfidTag());
             response.setImportDate(LocalDate.from(productsLog.getCreatedDate()));
             response.setSkuCode(request.getSkuCode());
             response.setManufacturerDate(batchProduct.getManufacturerDate());
@@ -152,6 +153,7 @@ public class ImportGoodsProcessor {
         productsLog = productLogService.updateLog(productLogDTO);
 
         response.setBatchId(batchProduct.getId());
+        response.setRfid(packet.getRfidTag());
         response.setImportDate(LocalDate.from(productsLog.getCreatedDate()));
         response.setSkuCode(request.getSkuCode());
         response.setManufacturerDate(batchProduct.getManufacturerDate());
@@ -164,18 +166,15 @@ public class ImportGoodsProcessor {
 
     private ServiceResponse verifyImportGoodRequest(RfidDTO request){
         if(request == null || request.getSkuCode() == null || request.getBatchId() == null){
-            return new ServiceResponse(ErrorCode.INVALID_RFID_TAG.getMessage(), 400);
-//            throw new AppException(ErrorCode.INVALID_RFID_TAG);
+            throw new AppException(ErrorCode.INVALID_RFID_TAG);
         }
 
         if(!productService.existProductBySKUCode(request.getSkuCode())){
-            return new ServiceResponse(ErrorCode.PRODUCT_NOT_FOUND.getMessage(), 400);
-//            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
         if(packetService.checkPacket(request.getRfidCode())){
-            return new ServiceResponse(ErrorCode.PACKET_ALREADY_IMPORTED.getMessage(), 400);
-//            throw new AppException(ErrorCode.PACKET_ALREADY_IMPORTED);
+            throw new AppException(ErrorCode.PACKET_ALREADY_IMPORTED);
         }
 
         return null;

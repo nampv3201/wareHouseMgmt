@@ -51,11 +51,13 @@ public enum ErrorCode {
 
     WARE_HOUSE_NOT_EXIST(0, "Không tìm thấy thông tin kho hàng", HttpStatus.BAD_REQUEST),
 
-    MERCHANT_NOT_FOUND(0, "Không tìm thấy thông tin đối tác", HttpStatus.BAD_REQUEST),
+    PARTNER_NOT_FOUND(0, "Không tìm thấy thông tin đối tác", HttpStatus.BAD_REQUEST),
 
     ACTION_NOT_DEFINE(0, "Không xác định được hành động", HttpStatus.BAD_REQUEST),
 
     PERMISSION_NOT_FOUND(0, "Không tìm thấy quyền", HttpStatus.BAD_REQUEST),
+
+    CATEGORY_NOT_NULL(0, "Danh mục không được bỏ trống", HttpStatus.BAD_REQUEST),
     ;
 
 

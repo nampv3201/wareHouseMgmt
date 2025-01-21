@@ -13,8 +13,8 @@ import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @Query(value = "SELECT p FROM Product p " +
-            "join p.categories cat " +
+    @Query(value = "SELECT DISTINCT p FROM Product p " +
+            "LEFT join p.categories cat " +
             "WHERE (:search IS NULL " +
             "OR :search = '' " +
             "OR LOWER(p.name) LIKE concat('%', coalesce(:search, ''), '%') " +

@@ -9,6 +9,7 @@ import java.time.LocalDate;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ImportProcessResponse {
+    String rfid;
     Long batchId;
     String skuCode;
     String warehouseName;

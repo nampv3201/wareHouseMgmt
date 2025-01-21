@@ -22,8 +22,8 @@ public class BatchProduct {
     @Column(name = "product_sku_code")
     String productSkuCode;
 
-    @Column(name = "supplier_id")
-    Long supplierId;
+    @Column(name = "partner_id")
+    Long partnerId;
 
     @Column(name = "ware_house_id")
     Long warehouseId;

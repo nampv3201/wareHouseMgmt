@@ -145,7 +145,8 @@ public class ImportProduct {
     public String fileErrorName(ImportDetail importDetail, String fileName){
         List<String> fileSplit = List.of(fileName.split("\\."));
         String originalName = fileName.split("-")[0];
-        String outputPath = uploadResultFolder + originalName + "-" + UUID.randomUUID() + "." + fileSplit.get(1);
+        String newName = originalName + "-" + UUID.randomUUID();
+        String outputPath = uploadResultFolder + newName + "." + fileSplit.get(1);
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(outputPath)){
             fileOutputStream.write(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF});
@@ -168,7 +169,7 @@ public class ImportProduct {
             throw new AppException(ErrorCode.IO_EXCEPTION);
         }
 
-        return outputPath;
+        return newName + ".csv";
 
     }
 }

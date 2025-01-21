@@ -11,7 +11,6 @@ import com.datn.warehousemgmt.utils.DateTimeUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -21,8 +20,10 @@ import java.util.Map;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
-    @Mapping(source = "categories", target = "categoryList",
+    @Mapping(source = "product.categories", target = "categoryList",
             qualifiedByName = "mapCategoryNames")
+    @Mapping(source = "product.categories", target = "categoryIds",
+            qualifiedByName = "mapCategoryIds")
     ProductDTO productToProductDTO(Product product);
 
     Product productDTOToProduct(ProductDTO productDTO);
@@ -37,6 +38,16 @@ public interface ProductMapper {
                 .toList();
     }
 
+    @Named("mapCategoryIds")
+    default List<Long> mapCategoryIds(List<Category> categories) {
+        if (categories == null) {
+            return new ArrayList<>();
+        }
+        return categories.stream()
+                .map(Category::getId)
+                .toList();
+    }
+
     default ProductLogDTO fromEntityToLogDTO(ProductsLog productsLog){
         ProductLogDTO productLogDTO = new ProductLogDTO();
         productLogDTO.setId(productsLog.getId());
@@ -44,7 +55,7 @@ public interface ProductMapper {
         productLogDTO.setQuantity(productsLog.getQuantity());
         productLogDTO.setAction(productsLog.getAction());
         productLogDTO.setStatus(productsLog.getStatus());
-        productLogDTO.setMerchantId(productsLog.getMerchant() == null ? null : productsLog.getMerchant().getId());
+        productLogDTO.setPartnerId(productsLog.getPartner() == null ? null : productsLog.getPartner().getId());
         productLogDTO.setPackets(new ArrayList<>(productsLog.getPackets()));
         return productLogDTO;
     };

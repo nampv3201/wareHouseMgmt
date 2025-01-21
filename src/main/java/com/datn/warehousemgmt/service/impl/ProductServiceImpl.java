@@ -49,12 +49,11 @@ public class ProductServiceImpl implements ProductService {
     private final ImportProduct importProduct;
     @Override
     public String generateSKUCode(){
-        SecurityContextHolder.getContext().getAuthentication();
         StringBuilder code = new StringBuilder();
         Random r = new Random();
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 12; i++) {
             code.append(alphabet.charAt(r.nextInt(alphabet.length())));
-            if(i==4){
+            if(i==4 || i==8){
                 code.append("-");
             }
         }
@@ -76,6 +75,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ServiceResponse createProduct(ProductRequest request) {
+        validateRequest(request);
         Product p = new Product();
         BeanUtils.copyProperties(request, p);
         if(p.getImageLink().isEmpty()){
@@ -100,6 +100,7 @@ public class ProductServiceImpl implements ProductService {
         p.setName(request.getName());
         p.setDescription(request.getDescription());
         p.setImageLink(request.getImageLink());
+        p.getCategories().clear();
         p.getCategories().addAll(categoryRepository.findAllByIdIn(request.getCategoryIds()));
         try{
             productRepository.save(p);
@@ -178,4 +179,12 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    private void validateRequest(ProductRequest request){
+        if(request.getName() == null || request.getName().isEmpty()) {
+            throw new AppException(ErrorCode.NAME_NOT_NULL);
+        }
+        if(request.getCategoryIds().isEmpty()){
+            throw new AppException(ErrorCode.CATEGORY_NOT_NULL);
+        }
+    }
 }

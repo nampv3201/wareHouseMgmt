@@ -4,6 +4,7 @@ import com.datn.warehousemgmt.dto.ProductLogDTO;
 import com.datn.warehousemgmt.dto.RfidDTO;
 import com.datn.warehousemgmt.dto.ServiceResponse;
 import com.datn.warehousemgmt.processor.ImportGoodsProcessor;
+import com.datn.warehousemgmt.service.PacketService;
 import com.datn.warehousemgmt.service.ProductLogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "API quản lý kho")
 public class WarehouseController {
     private final ImportGoodsProcessor importGoodsProcessor;
-    private final ProductLogService productLogService;
+    private final PacketService packetService;
     private final SimpMessagingTemplate messagingTemplate;
 
     @Operation(summary = "Nhập kho")
@@ -42,6 +43,13 @@ public class WarehouseController {
         ServiceResponse res = importGoodsProcessor.executeTask(request);
 
         messagingTemplate.convertAndSend("/topic/product/log", res);
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Đổi trạng thái kiện hàng")
+    @PutMapping("/change-packet-status")
+    public ResponseEntity<?> changeStatus(@RequestBody RfidDTO request){
+        ServiceResponse res = packetService.updatePacket(request.getRfidCode());
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 }

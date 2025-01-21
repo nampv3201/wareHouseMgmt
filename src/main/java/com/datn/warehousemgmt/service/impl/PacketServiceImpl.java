@@ -43,8 +43,22 @@ public class PacketServiceImpl implements PacketService {
     }
 
     @Override
-    public ServiceResponse updatePacket() {
-        return null;
+    public ServiceResponse updatePacket(String rfid) {
+        try {
+            Packet packet = packetRepository.findByRfidTag(rfid);
+            if (packet == null) {
+                throw new AppException(ErrorCode.PACKET_NOT_FOUND);
+            } else if (packet.getStatus().equals(Constant.PacketStatus.EXPORTED.getStatus())) {
+                throw new AppException(ErrorCode.PACKET_ALREADY_EXPORTED);
+            }else if (packet.getStatus().equals(Constant.PacketStatus.IN_STOCK.getStatus())) {
+                packet.setStatus(Constant.PacketStatus.CANCELED.getStatus());
+            }else if (packet.getStatus().equals(Constant.PacketStatus.CANCELED.getStatus())) {
+                packet.setStatus(Constant.PacketStatus.IN_STOCK.getStatus());
+            }
+            return new ServiceResponse(packetRepository.save(packet), "Đổi trạng thái thành công", 200);
+        }catch (Exception e){
+            throw new RuntimeException("Đổi trạng thái thất bại: " + e.getMessage());
+        }
     }
 
     @Override
